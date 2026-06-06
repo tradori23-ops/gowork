@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v8';
+  var BUILD='20260606-gw-v10';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -173,8 +173,22 @@ html[data-theme="dark"] .btn-go{color:#06140d}
 .empty{text-align:center;color:var(--muted);padding:28px 10px;font-size:14px}
 .empty .em{font-size:32px;display:block;margin-bottom:8px;opacity:.7}
 
-/* month nav */
-.mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+/* ===== Calendario ===== */
+.caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.caldow span{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calcell{aspect-ratio:1/1.05;border:1px solid var(--line);border-radius:11px;padding:5px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:.12s;background:var(--card);overflow:hidden;position:relative}
+.calcell:active{transform:scale(.95)}
+.calcell.empty{border:none;background:none;cursor:default}
+.calcell.oggi{border-color:var(--go);box-shadow:inset 0 0 0 1px var(--go)}
+.calcell.festivo .cd{color:var(--permr)}
+.calcell .cd{font-size:13px;font-weight:700;font-family:'JetBrains Mono'}
+.calcell .ch{font-size:9px;color:var(--go);font-family:'JetBrains Mono';font-weight:700;margin-top:1px}
+.caldots{display:flex;gap:2px;margin-top:auto;flex-wrap:wrap;justify-content:center;padding-bottom:1px}
+.caldots i{width:5px;height:5px;border-radius:50%;display:inline-block}
+.callegend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:14px;font-size:11px;color:var(--muted)}
+.callegend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+@media(min-width:880px){.calcell .cd{font-size:15px}.calcell .ch{font-size:11px}}
 .mnav b{font-family:'Bricolage Grotesque';font-size:18px;text-transform:capitalize}
 
 /* Nav bar */
@@ -298,7 +312,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v8 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v10 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -343,21 +357,27 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 
   <!-- ===== REGISTRO ===== -->
   <section class="view" id="view-registro">
-    <div class="card">
+    <div class="card fullspan">
       <div class="mnav">
         <button class="icbtn" onclick="navMonth(-1)">‹</button>
         <b id="regMonthLbl"></b>
         <button class="icbtn" onclick="navMonth(1)">›</button>
       </div>
+      <div id="calGrid"></div>
+      <div class="callegend">
+        <span><i style="background:var(--go)"></i>lavoro</span>
+        <span><i style="background:var(--rol)"></i>impegno</span>
+        <span><i style="background:var(--ferie)"></i>ferie</span>
+        <span><i style="background:var(--permr)"></i>permesso</span>
+      </div>
+    </div>
+    <div class="card">
       <div class="grid3" style="margin-top:0">
         <div class="stat"><div class="v mono" id="mWork">0</div><div class="l">Ore lavorate</div></div>
         <div class="stat"><div class="v mono" id="mOver">0</div><div class="l">Straordinario</div></div>
         <div class="stat"><div class="v mono" id="mDays">0</div><div class="l">Giorni</div></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="flex"><h2>Giornate</h2><span class="spacer"></span><button class="btn btn-ghost btn-sm" onclick="openTimbra()">+ Aggiungi</button></div>
-      <div id="regList"></div>
+      <button class="btn btn-ghost btn-block btn-sm" style="margin-top:12px" onclick="openTimbra()">+ Aggiungi giornata manuale</button>
     </div>
   </section>
 
@@ -454,6 +474,15 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
         <div><label class="f">Stipendio lordo / mese (€)</label><input type="number" id="setStip" step="50" min="0"></div>
         <div><label class="f">Mensilità</label><select id="setMens"><option value="12">12</option><option value="13">13</option><option value="14">14</option></select></div>
       </div>
+      <label class="f">Data inizio lavoro (attuale)</label>
+      <input type="date" id="setInizioLav">
+      <div id="anzianitaOut"></div>
+    </div>
+
+    <div class="card">
+      <div class="flex"><h2>Carriera</h2><span class="spacer"></span><button class="btn btn-ghost btn-sm" onclick="cambiaLavoro()">Ho cambiato lavoro</button></div>
+      <div class="sub">Storico dei rapporti di lavoro</div>
+      <div id="carrieraList"></div>
     </div>
 
     <div class="card fullspan" id="pensioneCard">
@@ -461,7 +490,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="sub">Indicazione orientativa, non ufficiale</div>
       <div class="f2">
         <div><label class="f">Data di nascita</label><input type="date" id="setNascita"></div>
-        <div><label class="f">Anni di contributi già versati</label><input type="number" id="setContrib" step="1" min="0"></div>
+        <div><label class="f">Contributi precedenti (anni)</label><input type="number" id="setContrib" step="0.5" min="0" placeholder="0"></div>
       </div>
       <div id="pensioneOut"></div>
       <div class="hint">⚠️ Stima molto approssimativa con il sistema <b>contributivo</b> (ipotesi: aliquota 33%, stipendio costante, coefficiente ~5,7% a 67 anni). <b>Non è un calcolo ufficiale.</b> Per la cifra reale usa il simulatore INPS "La mia pensione futura". GoWork non fornisce consulenza previdenziale.</div>
@@ -506,7 +535,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v8 · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v10 · by Sergio</div>
   </section>
 </div>
 
@@ -546,7 +575,7 @@ function randSalt(){return [...crypto.getRandomValues(new Uint8Array(8))].map(b=
 function dataKey(){return 'gw_'+(currentUser?currentUser.email:'_none')+'_data';}
 const DEFAULTS=()=>({
   version:1,
-  profile:{nome:'',professione:'',ditta:'',tipoContratto:'indeterminato',ccnl:'',stipendio:0,mensilita:13,dataNascita:'',anniContributi:0},
+  profile:{nome:'',professione:'',ditta:'',tipoContratto:'indeterminato',ccnl:'',stipendio:0,mensilita:13,dataNascita:'',anniContributi:0,dataInizioLavoro:''},
   settings:{
     oreGiornaliere:8, oreSettimanali:40, giorniLavorativi:[1,2,3,4,5],
     ferieIniziali:26, ferieMese:0, rolIniziali:0, rolMese:0, permessiRetr:0,
@@ -555,7 +584,9 @@ const DEFAULTS=()=>({
   sessione:null,            // {inizio, pause:[{inizio,fine}], note}
   giornate:{},              // 'YYYY-MM-DD': {sessioni:[{inizio,fine,note}]}
   assenze:[],               // {id,tipo,dataInizio,dataFine,giornataIntera,ore,note}
-  diario:[]                 // {id, data, titolo, testo, ore}
+  diario:[],                // {id, data, titolo, testo, ore}
+  impegni:[],               // {id, data, ora, titolo, note}
+  carriera:[]               // {id, ditta, ruolo, tipoContratto, ccnl, dataInizio, dataFine}
 });
 let D=DEFAULTS();
 function load(){
@@ -638,7 +669,7 @@ matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(D.se
 /* ================= NAVIGAZIONE ================= */
 const TABS=[
   {id:'oggi',ic:'⏱',lab:'Oggi'},
-  {id:'registro',ic:'📅',lab:'Registro'},
+  {id:'registro',ic:'📆',lab:'Calendario'},
   {id:'diario',ic:'📒',lab:'Diario'},
   {id:'assenze',ic:'🏖',lab:'Ferie'},
   {id:'riep',ic:'📊',lab:'Riepilogo'},
@@ -748,33 +779,121 @@ function timbraUscita(){
   toast('Uscita registrata · '+hm(sessDurMs(D.giornate[iso].sessioni.slice(-1)[0]))+' h');
 }
 
-/* ================= VIEW: REGISTRO ================= */
+/* ================= VIEW: CALENDARIO ================= */
 let regCursor=new Date(); regCursor.setDate(1);
 function navMonth(n){regCursor.setMonth(regCursor.getMonth()+n);renderRegistro();}
+function impegniDi(iso){return (D.impegni||[]).filter(x=>x.data===iso);}
+function assenzeDi(iso){
+  const t=parseDay(iso);
+  return (D.assenze||[]).filter(a=>{const d1=parseDay(a.dataInizio),d2=parseDay(a.dataFine||a.dataInizio);return t>=d1&&t<=d2;});
+}
 function renderRegistro(){
   const y=regCursor.getFullYear(),m=regCursor.getMonth();
   document.getElementById('regMonthLbl').textContent=MESI[m]+' '+y;
-  const days=Object.keys(D.giornate).filter(k=>{const d=parseDay(k);return d.getFullYear()===y&&d.getMonth()===m;}).sort().reverse();
+  // statistiche mese
   let totMs=0,giorni=0,attese=0;
-  days.forEach(k=>{const ms=D.giornate[k].sessioni.reduce((a,s)=>a+sessDurMs(s),0);totMs+=ms;giorni++;});
-  // ore attese = giorni lavorativi del mese * ore/gg (al netto ferie intere)
+  Object.keys(D.giornate).forEach(k=>{const d=parseDay(k);if(d.getFullYear()===y&&d.getMonth()===m){totMs+=D.giornate[k].sessioni.reduce((a,s)=>a+sessDurMs(s),0);giorni++;}});
   const lastDay=new Date(y,m+1,0).getDate();
   for(let d=1;d<=lastDay;d++){const iso=y+'-'+pad(m+1)+'-'+pad(d);if(isLavorativo(iso))attese+=D.settings.oreGiornaliere;}
   const over=totMs/3600000-attese;
   document.getElementById('mWork').textContent=oreStr(totMs/3600000)+'h';
   const ov=document.getElementById('mOver');ov.textContent=(over>=0?'+':'')+oreStr(over)+'h';ov.className='v mono '+(over>=0?'pos':'neg');
   document.getElementById('mDays').textContent=giorni;
-  const el=document.getElementById('regList');
-  if(!days.length){el.innerHTML='<div class="empty"><span class="em">📭</span>Nessuna giornata in questo mese</div>';return;}
-  el.innerHTML=days.map(k=>{
-    const ms=D.giornate[k].sessioni.reduce((a,s)=>a+sessDurMs(s),0);
-    const ns=D.giornate[k].sessioni.length;
-    const diff=ms/3600000-(isLavorativo(k)?D.settings.oreGiornaliere:0);
-    return `<div class="row" onclick="editGiornata('${k}')"><div class="tag" style="background:var(--go)"></div>
-      <div class="main"><div class="t1">${fmtData(k)}</div><div class="t2">${ns} sessione/i · saldo ${(diff>=0?'+':'')+decToHM(diff)}</div></div>
-      <div class="amt">${hm(ms)}<small>ore</small></div></div>`;
-  }).join('');
+  // griglia
+  const firstDow=(new Date(y,m,1).getDay()+6)%7; // 0=Lun
+  const oggi=isoDay();
+  let cells='';
+  for(let i=0;i<firstDow;i++)cells+='<div class="calcell empty"></div>';
+  for(let d=1;d<=lastDay;d++){
+    const iso=y+'-'+pad(m+1)+'-'+pad(d);
+    const g=D.giornate[iso];const ms=g?g.sessioni.reduce((a,s)=>a+sessDurMs(s),0):0;
+    const imp=impegniDi(iso).length, ass=assenzeDi(iso);
+    let dots='';
+    if(imp)dots+='<i style="background:var(--rol)"></i>';
+    ass.forEach(a=>{dots+=`<i style="background:${TIPI[a.tipo].col}"></i>`;});
+    const dow=parseDay(iso).getDay();
+    cells+=`<div class="calcell${iso===oggi?' oggi':''}${(dow===0||dow===6)?' festivo':''}" onclick="openGiorno('${iso}')">
+      <div class="cd">${d}</div>${ms?`<div class="ch">${hm(ms)}</div>`:''}
+      <div class="caldots">${dots}</div></div>`;
+  }
+  document.getElementById('calGrid').innerHTML=
+    '<div class="caldow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span></div>'+
+    '<div class="calgrid">'+cells+'</div>';
 }
+function openGiorno(iso){
+  const g=D.giornate[iso];const imp=impegniDi(iso);const ass=assenzeDi(iso);
+  let sez='';
+  // sessioni di lavoro
+  if(g&&g.sessioni.length){
+    sez+='<div class="loginsub" style="text-align:left;margin:6px 0 4px">Lavoro</div>';
+    g.sessioni.forEach((x,i)=>{const e=new Date(x.inizio),u=new Date(x.fine);
+      sez+=`<div class="row" onclick="editSessione('${iso}',${i})"><div class="tag" style="background:var(--go)"></div><div class="main"><div class="t1">${pad(e.getHours())}:${pad(e.getMinutes())} → ${pad(u.getHours())}:${pad(u.getMinutes())}</div></div><div class="amt">${hm(sessDurMs(x))}<small>ore</small></div></div>`;});
+  }
+  // assenze
+  ass.forEach(a=>{const t=TIPI[a.tipo];sez+=`<div class="row"><div class="tag" style="background:${t.col}"></div><div class="main"><div class="t1">${t.em} ${t.lab}</div><div class="t2">${a.note||''}</div></div></div>`;});
+  // impegni
+  sez+='<div class="loginsub" style="text-align:left;margin:14px 0 4px">Impegni</div>';
+  if(imp.length)imp.sort((a,b)=>(a.ora||'').localeCompare(b.ora||'')).forEach(x=>{
+    sez+=`<div class="row" onclick="openImpegno('${iso}','${x.id}')"><div class="tag" style="background:var(--rol)"></div><div class="main"><div class="t1">${x.titolo}</div><div class="t2">${x.ora?'🕒 '+x.ora+(x.note?' · ':''):''}${x.note||''}</div></div><div class="amt" style="color:var(--rol)">›</div></div>`;});
+  else sez+='<div class="empty" style="padding:14px"><span class="em">🗓️</span>Nessun impegno</div>';
+  openSheet(`<h3>${fmtData(iso)} ${parseDay(iso).getFullYear()}</h3>${sez}
+    <button class="btn btn-go btn-block" style="margin-top:14px" onclick="openImpegno('${iso}')">+ Aggiungi impegno</button>
+    <button class="btn btn-ghost btn-block btn-sm" style="margin-top:8px" onclick="openTimbra('${iso}')">+ Aggiungi giornata di lavoro</button>`);
+}
+function openImpegno(iso,id){
+  const x=id?D.impegni.find(i=>i.id===id):null;
+  openSheet(`<h3>${x?'Modifica':'Nuovo'} impegno</h3>
+    <label class="f">Data</label><input type="date" id="imDate" value="${x?x.data:iso}">
+    <div class="f2"><div><label class="f">Ora (opz.)</label><input type="time" id="imOra" value="${x?x.ora||'':''}"></div>
+    <div><label class="f">Titolo</label><input id="imTit" value="${x?(x.titolo||'').replace(/"/g,'&quot;'):''}" placeholder="es. Visita medica"></div></div>
+    <label class="f">Note</label><textarea id="imNote" rows="3">${x?x.note||'':''}</textarea>
+    <button class="btn btn-go btn-block" style="margin-top:14px" onclick="saveImpegno('${id||''}')">Salva</button>
+    ${x?`<button class="btn btn-block danger" style="background:var(--permr-soft);margin-top:8px" onclick="delImpegno('${id}')">Elimina</button>`:''}`);
+}
+function saveImpegno(id){
+  const data=document.getElementById('imDate').value;if(!data)return toast('Inserisci la data');
+  const o={id:id||('i'+Date.now()),data,ora:document.getElementById('imOra').value,titolo:document.getElementById('imTit').value.trim()||'Impegno',note:document.getElementById('imNote').value.trim()};
+  if(!D.impegni)D.impegni=[];
+  if(id){const i=D.impegni.findIndex(x=>x.id===id);D.impegni[i]=o;}else D.impegni.push(o);
+  save();closeSheet();renderRegistro();toast('Impegno salvato');
+}
+function delImpegno(id){gwAsk('Eliminare questo impegno?','🗑️','Elimina',null,ok=>{if(!ok)return;D.impegni=D.impegni.filter(x=>x.id!==id);save();closeSheet();renderRegistro();toast('Eliminato');});}
+
+/* ================= CARRIERA & ANZIANITÀ ================= */
+function anniMesiTra(d1,d2){
+  let a=d2.getFullYear()-d1.getFullYear();let m=d2.getMonth()-d1.getMonth();
+  if(d2.getDate()<d1.getDate())m--;
+  if(m<0){a--;m+=12;}
+  return {anni:Math.max(0,a),mesi:Math.max(0,m)};
+}
+function anzianitaTesto(dataInizio){
+  if(!dataInizio)return null;
+  const r=anniMesiTra(parseDay(dataInizio),new Date());
+  return r.anni+' anni e '+r.mesi+' mesi';
+}
+function renderCarriera(){
+  const out=document.getElementById('anzianitaOut');
+  if(out){const az=anzianitaTesto(D.profile.dataInizioLavoro);
+    out.innerHTML=az?`<div class="hint" style="margin-top:10px">📌 Anzianità nel lavoro attuale: <b>${az}</b></div>`:'';}
+  const cl=document.getElementById('carrieraList');if(!cl)return;
+  const c=(D.carriera||[]).slice().sort((a,b)=>(b.dataFine||'').localeCompare(a.dataFine||''));
+  if(!c.length){cl.innerHTML='<div class="empty" style="padding:16px"><span class="em">💼</span>Nessun lavoro precedente</div>';return;}
+  cl.innerHTML=c.map(j=>{const r=anniMesiTra(parseDay(j.dataInizio),parseDay(j.dataFine));
+    return `<div class="row" onclick="delCarriera('${j.id}')"><div class="tag" style="background:var(--permn)"></div>
+    <div class="main"><div class="t1">${j.ditta||'—'}${j.ruolo?' · '+j.ruolo:''}</div><div class="t2">${fmtData(j.dataInizio)} → ${fmtData(j.dataFine)} · ${r.anni}a ${r.mesi}m</div></div></div>`;}).join('');
+}
+function cambiaLavoro(){
+  const p=D.profile;
+  if(!p.dataInizioLavoro){toast('Imposta prima la data inizio del lavoro attuale');return;}
+  gwAsk('Archiviare il lavoro attuale ('+(p.ditta||'—')+') e iniziarne uno nuovo? La data di fine sarà oggi.','💼','Archivia',null,ok=>{
+    if(!ok)return;
+    if(!D.carriera)D.carriera=[];
+    D.carriera.push({id:'c'+Date.now(),ditta:p.ditta,ruolo:p.professione,tipoContratto:p.tipoContratto,ccnl:p.ccnl,dataInizio:p.dataInizioLavoro,dataFine:isoDay()});
+    p.ditta='';p.professione='';p.ccnl='';p.dataInizioLavoro='';
+    save();renderSettings();toast('Lavoro archiviato — inserisci il nuovo');
+  });
+}
+function delCarriera(id){gwAsk('Eliminare questo lavoro dallo storico?','🗑️','Elimina',null,ok=>{if(!ok)return;D.carriera=D.carriera.filter(x=>x.id!==id);save();renderCarriera();toast('Eliminato');});}
 
 /* ================= VIEW: ASSENZE ================= */
 let assYear=new Date().getFullYear();
@@ -839,6 +958,13 @@ function delDiario(id){gwAsk('Eliminare questa attività?','🗑️','Elimina',n
 
 /* ================= STIMA PENSIONE (orientativa) ================= */
 function etaDa(dataNascita){const n=parseDay(dataNascita);const o=new Date();let e=o.getFullYear()-n.getFullYear();if(o.getMonth()<n.getMonth()||(o.getMonth()===n.getMonth()&&o.getDate()<n.getDate()))e--;return e;}
+function anniDecimali(d1,d2){return Math.max(0,(d2-d1)/(365.25*86400000));}
+function contributiMaturati(){ // anni decimali da lavoro attuale + carriera registrata
+  const p=D.profile;let tot=0;
+  if(p.dataInizioLavoro)tot+=anniDecimali(parseDay(p.dataInizioLavoro),new Date());
+  (D.carriera||[]).forEach(j=>{if(j.dataInizio&&j.dataFine)tot+=anniDecimali(parseDay(j.dataInizio),parseDay(j.dataFine));});
+  return tot;
+}
 function stimaPensione(){
   const p=D.profile;
   const ral=(p.stipendio||0)*(p.mensilita||13);
@@ -846,14 +972,17 @@ function stimaPensione(){
   const eta=etaDa(p.dataNascita);
   const etaPensione=67;                       // vecchiaia (regola attuale)
   const anniResidui=Math.max(0,etaPensione-eta);
-  const anniTot=(p.anniContributi||0)+anniResidui;
+  const contribAuto=contributiMaturati();      // da date (lavoro attuale + carriera)
+  const contribPrec=(p.anniContributi||0);     // periodi non registrati, inseriti a mano
+  const contribGiaVersati=contribAuto+contribPrec;
+  const anniTot=contribGiaVersati+anniResidui;
   const aliquota=0.33;                         // contributiva dipendenti
   const coeff=0.057;                           // coeff. trasformazione ~67 anni
   const montante=ral*aliquota*anniTot;         // semplificato, senza rivalutazione composta
   const annua=montante*coeff;
   const mensile=annua/13;
   const tasso=annua/ral;
-  return {ral,eta,anniResidui,anniTot,annoPensione:new Date().getFullYear()+anniResidui,annua,mensile,tasso};
+  return {ral,eta,anniResidui,anniTot,contribAuto,contribPrec,contribGiaVersati,annoPensione:new Date().getFullYear()+anniResidui,annua,mensile,tasso};
 }
 function renderPensione(){
   const out=document.getElementById('pensioneOut');if(!out)return;
@@ -864,7 +993,7 @@ function renderPensione(){
     <div class="stat"><div class="v mono">${r.annoPensione}</div><div class="l">Anno (a 67)</div></div>
     <div class="stat"><div class="v mono">${Math.round(r.tasso*100)}%</div><div class="l">su stipendio</div></div>
   </div>
-  <div class="sub" style="margin-top:10px">Su stipendio lordo annuo €${Math.round(r.ral).toLocaleString('it-IT')} · ${r.anniTot} anni di contributi stimati al pensionamento.</div>`;
+  <div class="hint" style="margin-top:10px">📌 Contributi già maturati: <b>${r.contribGiaVersati.toFixed(1)} anni</b> (${r.contribAuto.toFixed(1)} da carriera registrata${r.contribPrec?' + '+r.contribPrec+' precedenti':''}). Al pensionamento: ~${Math.round(r.anniTot)} anni totali · stipendio lordo annuo €${Math.round(r.ral).toLocaleString('it-IT')}.</div>`;
 }
 
 /* ================= VIEW: RIEPILOGO ================= */
@@ -1040,6 +1169,7 @@ function renderSettings(){
   document.getElementById('setMens').value=p.mensilita||13;
   document.getElementById('setNascita').value=p.dataNascita||'';
   document.getElementById('setContrib').value=p.anniContributi||'';
+  document.getElementById('setInizioLav').value=p.dataInizioLavoro||'';
   document.getElementById('setOreGg').value=s.oreGiornaliere;
   document.getElementById('setOreSett').value=s.oreSettimanali;
   document.getElementById('setFerieIni').value=s.ferieIniziali;
@@ -1055,6 +1185,7 @@ function renderSettings(){
   document.getElementById('setDays').innerHTML=[1,2,3,4,5,6,0].map(d=>
     `<button class="${s.giorniLavorativi.includes(d)?'on ferie':''}" data-d="${d}" onclick="toggleDay(${d},this)">${GG[d]}</button>`).join('');
   renderPensione();
+  renderCarriera();
 }
 function toggleDay(d,btn){
   const arr=D.settings.giorniLavorativi;const i=arr.indexOf(d);
@@ -1072,6 +1203,7 @@ function saveSettings(){
   p.mensilita=parseInt(document.getElementById('setMens').value)||13;
   p.dataNascita=document.getElementById('setNascita').value;
   p.anniContributi=parseFloat(document.getElementById('setContrib').value)||0;
+  p.dataInizioLavoro=document.getElementById('setInizioLav').value;
   s.oreGiornaliere=parseFloat(document.getElementById('setOreGg').value)||8;
   s.oreSettimanali=parseFloat(document.getElementById('setOreSett').value)||40;
   s.ferieIniziali=parseFloat(document.getElementById('setFerieIni').value)||0;
@@ -1079,7 +1211,7 @@ function saveSettings(){
   s.rolIniziali=parseFloat(document.getElementById('setRolIni').value)||0;
   s.rolMese=parseFloat(document.getElementById('setRolMese').value)||0;
   s.permessiRetr=parseFloat(document.getElementById('setPermr').value)||0;
-  save();renderOggi();renderPensione();toast('Impostazioni salvate');
+  save();renderOggi();renderPensione();renderCarriera();toast('Impostazioni salvate');
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
