@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v6';
+  var BUILD='20260606-gw-v7';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -214,9 +214,13 @@ html[data-theme="dark"] .loginlogo{filter:drop-shadow(0 8px 20px rgba(0,0,0,.55)
 .loginbrand p{color:var(--muted);font-size:14px;margin:4px 0 0}
 .loginsub{font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;color:var(--ink)}
 .profgrid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:14px}
-.profcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;width:96px;text-align:center;cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.profcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;width:96px;text-align:center;cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
 .profcard:active{transform:scale(.95)}
 .profcard.sel{border-color:var(--go);box-shadow:0 0 0 3px var(--go-soft)}
+.profdel{position:absolute;top:-7px;right:-7px;width:24px;height:24px;border-radius:50%;background:var(--permr);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);z-index:2}
+.pwrap{position:relative}
+.pwrap input{padding-right:84px}
+.pweye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--go);font-family:'Manrope';font-weight:700;font-size:13px;cursor:pointer;padding:8px 10px}
 .profcard .av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--go),var(--go-deep));color:#fff;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;margin:0 auto 8px}
 html[data-theme="dark"] .profcard .av{color:#06140d}
 .profcard .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -243,11 +247,15 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="loginsub">Bentornato — scegli il profilo</div>
       <div id="profilesGrid" class="profgrid"></div>
       <div id="passBox" style="display:none">
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <div class="pwrap">
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <button type="button" class="pweye" onclick="togglePw('loginPassword',this)">Mostra</button>
+        </div>
         <button class="btn btn-go btn-block" style="margin-top:10px" onclick="doLogin()">Accedi</button>
         <button class="btn btn-ghost btn-block btn-sm" style="margin-top:8px" onclick="backToProfiles()">‹ Cambia profilo</button>
       </div>
       <button class="linkbtn" onclick="showRegister()">+ Crea un nuovo account</button>
+      <button class="linkbtn" id="manageBtn" onclick="toggleManage()" style="font-size:13px;opacity:.75;margin-top:-4px">Gestisci profili</button>
     </div>
 
     <!-- registrazione / primo accesso -->
@@ -255,7 +263,10 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="loginsub" id="regTitle">Crea il tuo account</div>
       <input type="text" id="regName" placeholder="Nome" autocomplete="name">
       <input type="email" id="regEmail" placeholder="Email" autocomplete="email" style="margin-top:10px">
-      <input type="password" id="regPassword" placeholder="Password (min. 6 caratteri)" autocomplete="new-password" style="margin-top:10px" onkeydown="if(event.key==='Enter')doRegister()">
+      <div class="pwrap" style="margin-top:10px">
+        <input type="password" id="regPassword" placeholder="Password (min. 6 caratteri)" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+        <button type="button" class="pweye" onclick="togglePw('regPassword',this)">Mostra</button>
+      </div>
       <button class="btn btn-go btn-block" style="margin-top:14px" onclick="doRegister()">Crea account</button>
       <button class="linkbtn" id="backToLoginBtn" onclick="showProfiles()" style="display:none">‹ Ho già un account</button>
     </div>
@@ -268,7 +279,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v4 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v7 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -436,7 +447,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block" onclick="saveSettings()">Salva impostazioni</button>
-    <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v1 · by Sergio</div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v7 · by Sergio</div>
   </section>
 </div>
 
@@ -450,7 +461,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 <div id="toast"></div>
 
 <!-- Modale conferma custom (sostituisce confirm() bloccato su iOS PWA) -->
-<div class="overlay" id="gwConfirm" style="align-items:center;padding:20px">
+<div class="overlay" id="gwConfirm" style="align-items:center;padding:20px;z-index:120">
   <div class="sheet" style="border-radius:22px;max-width:380px;text-align:center;padding:28px 22px calc(22px + env(safe-area-inset-bottom))">
     <div id="gwcIcon" style="font-size:42px;margin-bottom:8px">⚠️</div>
     <div id="gwcMsg" style="font-size:15.5px;font-weight:500;margin-bottom:22px;line-height:1.5"></div>
@@ -943,27 +954,51 @@ window.addEventListener('focus',renderOggi);
 /* ================= AUTH FLOW ================= */
 const GW_EMAILJS={serviceId:'',templateId:'',publicKey:''}; // ← inserisci i tuoi ID EmailJS per le email di benvenuto
 function loginMsg(m,t){const el=document.getElementById('loginMsg');el.textContent=m||'';el.className='loginmsg '+(t||'');}
-let selEmail=null;
+let selEmail=null,manageMode=false;
+function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='Nascondi';}else{i.type='password';btn.textContent='Mostra';}}
 function showProfiles(){
   selEmail=null;loginMsg('');
   const users=getUsers();
   document.getElementById('registerBox').style.display='none';
-  if(!users.length){showRegister(true);return;}
+  if(!users.length){manageMode=false;showRegister(true);return;}
   document.getElementById('profilesBox').style.display='block';
   document.getElementById('passBox').style.display='none';
+  const mb=document.getElementById('manageBtn');if(mb)mb.style.display=users.length?'block':'none';
   renderProfilesGrid();
 }
 function renderProfilesGrid(){
-  document.getElementById('profilesGrid').innerHTML=getUsers().map(u=>
-    `<div class="profcard" data-e="${u.email}" onclick="selectProfile('${u.email}')">
-      <div class="av">${(u.name||u.email)[0].toUpperCase()}</div>
-      <div class="nm">${u.name||u.email}</div></div>`).join('');
+  document.getElementById('profilesGrid').innerHTML=getUsers().map(u=>{
+    const init=(u.name||u.email)[0].toUpperCase();
+    const del=manageMode?`<div class="profdel" onclick="event.stopPropagation();askDeleteProfile('${u.email}')">✕</div>`:'';
+    const oc=manageMode?'':`onclick="selectProfile('${u.email}')"`;
+    return `<div class="profcard" data-e="${u.email}" ${oc}>${del}
+      <div class="av">${init}</div><div class="nm">${u.name||u.email}</div></div>`;
+  }).join('');
+}
+function toggleManage(){
+  manageMode=!manageMode;
+  const mb=document.getElementById('manageBtn');if(mb)mb.textContent=manageMode?'Fine':'Gestisci profili';
+  backToProfiles();renderProfilesGrid();
+}
+function askDeleteProfile(email){
+  const u=getUsers().find(x=>x.email===email);
+  gwAsk('Eliminare il profilo "'+(u?(u.name||email):email)+'"? I suoi dati su questo dispositivo verranno cancellati.','🗑️','Elimina',null,ok=>{
+    if(!ok)return;
+    saveUsers(getUsers().filter(x=>x.email!==email));
+    try{localStorage.removeItem('gw_'+email+'_data');}catch(e){}
+    if(localStorage.getItem('gw_current')===email)localStorage.removeItem('gw_current');
+    if(!getUsers().length){manageMode=false;showRegister(true);}
+    else{renderProfilesGrid();toast('Profilo eliminato');}
+  });
 }
 function selectProfile(email){
+  if(manageMode)return;
   selEmail=email;loginMsg('');
   document.querySelectorAll('.profcard').forEach(c=>c.classList.toggle('sel',c.dataset.e===email));
   document.getElementById('passBox').style.display='block';
-  const p=document.getElementById('loginPassword');p.value='';setTimeout(()=>p.focus(),60);
+  const p=document.getElementById('loginPassword');p.value='';p.type='password';
+  const eye=p.parentElement.querySelector('.pweye');if(eye)eye.textContent='Mostra';
+  setTimeout(()=>p.focus(),60);
 }
 function backToProfiles(){selEmail=null;document.getElementById('passBox').style.display='none';document.querySelectorAll('.profcard').forEach(c=>c.classList.remove('sel'));loginMsg('');}
 function showRegister(first){
