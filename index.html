@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v7';
+  var BUILD='20260606-gw-v8';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -85,6 +85,22 @@ body{
 h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;font-weight:700;margin:0}
 .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 .app{max-width:560px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom)) 16px}
+
+/* ===== Schermi larghi (desktop / iPad): riempi lo spazio ===== */
+@media(min-width:880px){
+  .app{max-width:1000px;padding-left:28px;padding-right:28px}
+  header{padding-top:26px}
+  .view.active{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+  .view.active>.card{margin-bottom:0}
+  .view.active>.clockcard,
+  .view.active>.fullspan{grid-column:1 / -1}
+  nav.tabbar{max-width:1000px;left:50%;transform:translateX(-50%);border-radius:18px 18px 0 0}
+}
+@media(min-width:1180px){
+  .app{max-width:1120px}
+  .view.active{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .view.active>.clockcard,.view.active>.fullspan{grid-column:1 / -1}
+}
 
 /* Header */
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 12px}
@@ -228,6 +244,8 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 .loginmsg{text-align:center;font-size:13.5px;font-weight:600;margin-top:14px;min-height:18px}
 .loginmsg.error{color:var(--permr)} .loginmsg.ok{color:var(--go)} .loginmsg.info{color:var(--muted)}
 .loginfoot{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;letter-spacing:.04em}
+.loginquote{text-align:center;font-family:'Bricolage Grotesque',serif;font-style:italic;font-size:15px;line-height:1.5;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:-8px 0 22px;box-shadow:var(--shadow);min-height:24px;transition:opacity .5s}
+.loginquote .qa{display:block;font-style:normal;font-family:'Manrope';font-size:12px;font-weight:700;color:var(--go);margin-top:8px;letter-spacing:.03em}
 </style>
 </head>
 <body>
@@ -241,6 +259,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <img src="gowork-logo.png" alt="GoWork — TradClab" class="loginlogo">
       <p>I tuoi orari, ferie e permessi. Sempre con te.</p>
     </div>
+    <div id="loginQuote" class="loginquote"></div>
 
     <!-- selezione profilo (se esistono account) -->
     <div id="profilesBox" style="display:none">
@@ -279,7 +298,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v7 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v8 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -385,9 +404,20 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
     </div>
   </section>
 
+  <!-- ===== DIARIO ===== -->
+  <section class="view" id="view-diario">
+    <div class="card fullspan">
+      <div class="flex"><h2>Diario di lavoro</h2><span class="spacer"></span><button class="btn btn-go btn-sm" onclick="openDiario()">+ Nuova attività</button></div>
+      <div class="sub">Annota cosa hai fatto, idee e attività</div>
+    </div>
+    <div class="card fullspan" id="diarioListCard">
+      <div id="diarioList"></div>
+    </div>
+  </section>
+
   <!-- ===== IMPOSTAZIONI ===== -->
   <section class="view" id="view-set">
-    <div class="card">
+    <div class="card fullspan">
       <div class="flex">
         <div class="logo" style="width:44px;height:44px;border-radius:13px;font-size:22px" id="accAvatar">G</div>
         <div style="min-width:0"><b id="accName" style="font-family:'Bricolage Grotesque';font-size:17px"></b><div class="sub" id="accEmail" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
@@ -406,6 +436,35 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       </div>
       <label class="f">Giorni lavorativi</label>
       <div id="setDays" class="segbtns" style="grid-template-columns:repeat(7,1fr)"></div>
+    </div>
+
+    <div class="card">
+      <h2>Dati lavorativi</h2>
+      <div class="sub">Professione, azienda e contratto</div>
+      <label class="f">Professione</label>
+      <input id="setProf" placeholder="es. Impiegato amministrativo">
+      <label class="f">Azienda / Ditta</label>
+      <input id="setDitta" placeholder="es. TradClab S.r.l.">
+      <div class="f2">
+        <div><label class="f">Tipo contratto</label>
+          <select id="setTipoContr"><option value="indeterminato">Indeterminato</option><option value="determinato">Determinato</option><option value="apprendistato">Apprendistato</option><option value="partita_iva">Partita IVA</option></select></div>
+        <div><label class="f">CCNL</label><input id="setCcnl" placeholder="es. Commercio"></div>
+      </div>
+      <div class="f2">
+        <div><label class="f">Stipendio lordo / mese (€)</label><input type="number" id="setStip" step="50" min="0"></div>
+        <div><label class="f">Mensilità</label><select id="setMens"><option value="12">12</option><option value="13">13</option><option value="14">14</option></select></div>
+      </div>
+    </div>
+
+    <div class="card fullspan" id="pensioneCard">
+      <h2>Pensione — stima</h2>
+      <div class="sub">Indicazione orientativa, non ufficiale</div>
+      <div class="f2">
+        <div><label class="f">Data di nascita</label><input type="date" id="setNascita"></div>
+        <div><label class="f">Anni di contributi già versati</label><input type="number" id="setContrib" step="1" min="0"></div>
+      </div>
+      <div id="pensioneOut"></div>
+      <div class="hint">⚠️ Stima molto approssimativa con il sistema <b>contributivo</b> (ipotesi: aliquota 33%, stipendio costante, coefficiente ~5,7% a 67 anni). <b>Non è un calcolo ufficiale.</b> Per la cifra reale usa il simulatore INPS "La mia pensione futura". GoWork non fornisce consulenza previdenziale.</div>
     </div>
 
     <div class="card">
@@ -446,8 +505,8 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="toggle"><div><b class="danger">Azzera tutto</b><div class="sub" style="margin:0">Cancella tutti i dati</div></div><button class="btn btn-ghost btn-sm danger" onclick="resetAll()">Cancella</button></div>
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
-    <button class="btn btn-go btn-block" onclick="saveSettings()">Salva impostazioni</button>
-    <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v7 · by Sergio</div>
+    <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v8 · by Sergio</div>
   </section>
 </div>
 
@@ -487,7 +546,7 @@ function randSalt(){return [...crypto.getRandomValues(new Uint8Array(8))].map(b=
 function dataKey(){return 'gw_'+(currentUser?currentUser.email:'_none')+'_data';}
 const DEFAULTS=()=>({
   version:1,
-  profile:{nome:''},
+  profile:{nome:'',professione:'',ditta:'',tipoContratto:'indeterminato',ccnl:'',stipendio:0,mensilita:13,dataNascita:'',anniContributi:0},
   settings:{
     oreGiornaliere:8, oreSettimanali:40, giorniLavorativi:[1,2,3,4,5],
     ferieIniziali:26, ferieMese:0, rolIniziali:0, rolMese:0, permessiRetr:0,
@@ -495,7 +554,8 @@ const DEFAULTS=()=>({
   },
   sessione:null,            // {inizio, pause:[{inizio,fine}], note}
   giornate:{},              // 'YYYY-MM-DD': {sessioni:[{inizio,fine,note}]}
-  assenze:[]                // {id,tipo,dataInizio,dataFine,giornataIntera,ore,note}
+  assenze:[],               // {id,tipo,dataInizio,dataFine,giornataIntera,ore,note}
+  diario:[]                 // {id, data, titolo, testo, ore}
 });
 let D=DEFAULTS();
 function load(){
@@ -579,6 +639,7 @@ matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(D.se
 const TABS=[
   {id:'oggi',ic:'⏱',lab:'Oggi'},
   {id:'registro',ic:'📅',lab:'Registro'},
+  {id:'diario',ic:'📒',lab:'Diario'},
   {id:'assenze',ic:'🏖',lab:'Ferie'},
   {id:'riep',ic:'📊',lab:'Riepilogo'},
   {id:'set',ic:'⚙️',lab:'Impostaz.'}
@@ -591,6 +652,7 @@ function go(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+id));
   document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('active',b.dataset.t===id));
   if(id==='registro')renderRegistro();
+  if(id==='diario')renderDiario();
   if(id==='assenze')renderAssenze();
   if(id==='riep')renderRiep();
   if(id==='set')renderSettings();
@@ -737,6 +799,72 @@ function rowAssenza(a){
   return `<div class="row" onclick="editAssenza('${a.id}')"><div class="tag" style="background:${t.col}"></div>
     <div class="main"><div class="t1">${t.em} ${t.lab}</div><div class="t2">${when}${a.note?' · '+a.note:''}</div></div>
     <div class="amt" style="color:${t.col}">${amt}</div></div>`;
+}
+
+/* ================= VIEW: DIARIO ================= */
+function renderDiario(){
+  const list=(D.diario||[]).slice().sort((a,b)=>b.data.localeCompare(a.data));
+  const el=document.getElementById('diarioList');
+  if(!list.length){el.innerHTML='<div class="empty"><span class="em">📒</span>Nessuna attività registrata. Tocca "+ Nuova attività".</div>';return;}
+  el.innerHTML=list.map(d=>`<div class="row" onclick="editDiario('${d.id}')"><div class="tag" style="background:var(--rol)"></div>
+    <div class="main"><div class="t1">${d.titolo||'Attività'}</div><div class="t2">${fmtData(d.data)}${d.testo?' · '+d.testo.replace(/</g,'&lt;').slice(0,80):''}</div></div>
+    ${d.ore?`<div class="amt">${decToHM(d.ore)}<small>ore</small></div>`:''}</div>`).join('');
+}
+function openDiario(){
+  openSheet(`<h3>Nuova attività</h3>
+    <label class="f">Data</label><input type="date" id="dDate" value="${isoDay()}">
+    <label class="f">Titolo</label><input id="dTit" placeholder="es. Riunione team / Report mensile">
+    <label class="f">Dettagli</label><textarea id="dTxt" rows="4" placeholder="Cosa hai fatto, note, idee…"></textarea>
+    <label class="f">Ore dedicate (opz.)</label><input type="number" id="dOre" step="0.5" min="0" placeholder="0">
+    <button class="btn btn-go btn-block" style="margin-top:16px" onclick="saveDiario()">Salva</button>`);
+}
+function saveDiario(id){
+  const data=document.getElementById('dDate').value;if(!data)return toast('Inserisci la data');
+  const o={id:id||('d'+Date.now()),data,titolo:document.getElementById('dTit').value.trim()||'Attività',testo:document.getElementById('dTxt').value.trim(),ore:parseFloat(document.getElementById('dOre').value||0)};
+  if(!D.diario)D.diario=[];
+  if(id){const i=D.diario.findIndex(x=>x.id===id);D.diario[i]=o;}else D.diario.push(o);
+  save();closeSheet();renderDiario();toast('Attività salvata');
+}
+function editDiario(id){
+  const d=D.diario.find(x=>x.id===id);if(!d)return;
+  openSheet(`<h3>Modifica attività</h3>
+    <label class="f">Data</label><input type="date" id="dDate" value="${d.data}">
+    <label class="f">Titolo</label><input id="dTit" value="${(d.titolo||'').replace(/"/g,'&quot;')}">
+    <label class="f">Dettagli</label><textarea id="dTxt" rows="4">${d.testo||''}</textarea>
+    <label class="f">Ore dedicate (opz.)</label><input type="number" id="dOre" step="0.5" min="0" value="${d.ore||''}">
+    <button class="btn btn-go btn-block" style="margin-top:16px" onclick="saveDiario('${id}')">Salva</button>
+    <button class="btn btn-block danger" style="background:var(--permr-soft);margin-top:8px" onclick="delDiario('${id}')">Elimina</button>`);
+}
+function delDiario(id){gwAsk('Eliminare questa attività?','🗑️','Elimina',null,ok=>{if(!ok)return;D.diario=D.diario.filter(x=>x.id!==id);save();closeSheet();renderDiario();toast('Eliminata');});}
+
+/* ================= STIMA PENSIONE (orientativa) ================= */
+function etaDa(dataNascita){const n=parseDay(dataNascita);const o=new Date();let e=o.getFullYear()-n.getFullYear();if(o.getMonth()<n.getMonth()||(o.getMonth()===n.getMonth()&&o.getDate()<n.getDate()))e--;return e;}
+function stimaPensione(){
+  const p=D.profile;
+  const ral=(p.stipendio||0)*(p.mensilita||13);
+  if(!ral||!p.dataNascita)return null;
+  const eta=etaDa(p.dataNascita);
+  const etaPensione=67;                       // vecchiaia (regola attuale)
+  const anniResidui=Math.max(0,etaPensione-eta);
+  const anniTot=(p.anniContributi||0)+anniResidui;
+  const aliquota=0.33;                         // contributiva dipendenti
+  const coeff=0.057;                           // coeff. trasformazione ~67 anni
+  const montante=ral*aliquota*anniTot;         // semplificato, senza rivalutazione composta
+  const annua=montante*coeff;
+  const mensile=annua/13;
+  const tasso=annua/ral;
+  return {ral,eta,anniResidui,anniTot,annoPensione:new Date().getFullYear()+anniResidui,annua,mensile,tasso};
+}
+function renderPensione(){
+  const out=document.getElementById('pensioneOut');if(!out)return;
+  const r=stimaPensione();
+  if(!r){out.innerHTML='<div class="hint" style="margin-top:6px">Inserisci <b>stipendio</b> e <b>data di nascita</b> per vedere la stima.</div>';return;}
+  out.innerHTML=`<div class="grid3" style="margin-top:14px">
+    <div class="stat"><div class="v mono">€${Math.round(r.mensile).toLocaleString('it-IT')}</div><div class="l">Pensione/mese (lordo)</div></div>
+    <div class="stat"><div class="v mono">${r.annoPensione}</div><div class="l">Anno (a 67)</div></div>
+    <div class="stat"><div class="v mono">${Math.round(r.tasso*100)}%</div><div class="l">su stipendio</div></div>
+  </div>
+  <div class="sub" style="margin-top:10px">Su stipendio lordo annuo €${Math.round(r.ral).toLocaleString('it-IT')} · ${r.anniTot} anni di contributi stimati al pensionamento.</div>`;
 }
 
 /* ================= VIEW: RIEPILOGO ================= */
@@ -903,6 +1031,15 @@ function renderSettings(){
     document.getElementById('accAvatar').textContent=(currentUser.name||currentUser.email)[0].toUpperCase();
   }
   document.getElementById('setNome').value=D.profile.nome||'';
+  const p=D.profile;
+  document.getElementById('setProf').value=p.professione||'';
+  document.getElementById('setDitta').value=p.ditta||'';
+  document.getElementById('setTipoContr').value=p.tipoContratto||'indeterminato';
+  document.getElementById('setCcnl').value=p.ccnl||'';
+  document.getElementById('setStip').value=p.stipendio||'';
+  document.getElementById('setMens').value=p.mensilita||13;
+  document.getElementById('setNascita').value=p.dataNascita||'';
+  document.getElementById('setContrib').value=p.anniContributi||'';
   document.getElementById('setOreGg').value=s.oreGiornaliere;
   document.getElementById('setOreSett').value=s.oreSettimanali;
   document.getElementById('setFerieIni').value=s.ferieIniziali;
@@ -917,6 +1054,7 @@ function renderSettings(){
   cloudBadge(gistReady?'ok':(_gToken&&_gId?'syncing':'off'));
   document.getElementById('setDays').innerHTML=[1,2,3,4,5,6,0].map(d=>
     `<button class="${s.giorniLavorativi.includes(d)?'on ferie':''}" data-d="${d}" onclick="toggleDay(${d},this)">${GG[d]}</button>`).join('');
+  renderPensione();
 }
 function toggleDay(d,btn){
   const arr=D.settings.giorniLavorativi;const i=arr.indexOf(d);
@@ -924,8 +1062,16 @@ function toggleDay(d,btn){
   btn.className=arr.includes(d)?'on ferie':'';
 }
 function saveSettings(){
-  const s=D.settings;
-  D.profile.nome=document.getElementById('setNome').value;
+  const s=D.settings,p=D.profile;
+  p.nome=document.getElementById('setNome').value;
+  p.professione=document.getElementById('setProf').value;
+  p.ditta=document.getElementById('setDitta').value;
+  p.tipoContratto=document.getElementById('setTipoContr').value;
+  p.ccnl=document.getElementById('setCcnl').value;
+  p.stipendio=parseFloat(document.getElementById('setStip').value)||0;
+  p.mensilita=parseInt(document.getElementById('setMens').value)||13;
+  p.dataNascita=document.getElementById('setNascita').value;
+  p.anniContributi=parseFloat(document.getElementById('setContrib').value)||0;
   s.oreGiornaliere=parseFloat(document.getElementById('setOreGg').value)||8;
   s.oreSettimanali=parseFloat(document.getElementById('setOreSett').value)||40;
   s.ferieIniziali=parseFloat(document.getElementById('setFerieIni').value)||0;
@@ -933,7 +1079,7 @@ function saveSettings(){
   s.rolIniziali=parseFloat(document.getElementById('setRolIni').value)||0;
   s.rolMese=parseFloat(document.getElementById('setRolMese').value)||0;
   s.permessiRetr=parseFloat(document.getElementById('setPermr').value)||0;
-  save();renderOggi();toast('Impostazioni salvate');
+  save();renderOggi();renderPensione();toast('Impostazioni salvate');
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
@@ -1052,7 +1198,7 @@ function logout(){
     document.querySelector('.app').style.display='none';
     document.getElementById('tabbar').style.display='none';
     document.getElementById('loginPage').style.display='flex';
-    showProfiles();window.scrollTo(0,0);
+    showProfiles();setQuote();window.scrollTo(0,0);
   });
 }
 function sendWelcomeEmail(name,email){
@@ -1130,7 +1276,7 @@ async function gistPull(onDone){
   cloudBadge('ok');if(onDone)onDone();
 }
 function schedulePush(){if(!gistReady)return;clearTimeout(_gPushTimer);_gPushTimer=setTimeout(()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();},1500);}
-function refreshAll(){renderOggi();const v=document.querySelector('.view.active');if(v){const id=v.id.replace('view-','');if(id==='registro')renderRegistro();if(id==='assenze')renderAssenze();if(id==='riep')renderRiep();if(id==='set')renderSettings();}}
+function refreshAll(){renderOggi();const v=document.querySelector('.view.active');if(v){const id=v.id.replace('view-','');if(id==='registro')renderRegistro();if(id==='diario')renderDiario();if(id==='assenze')renderAssenze();if(id==='riep')renderRiep();if(id==='set')renderSettings();}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gistReady&&currentUser&&!_gSyncing){clearTimeout(_gPushTimer);gistPush();}});
 window.addEventListener('pagehide',()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();});
 
@@ -1161,6 +1307,30 @@ async function settingsGistConnect(){
 function syncNow(){if(!gistReady){stMsg('Prima connetti il cloud.','error');return;}gistPull(()=>{stMsg('✅ Sincronizzato.','ok');toast('Sincronizzato');});}
 function syncDisconnect(){gwAsk('Disconnettere il cloud da questo dispositivo? I dati locali restano.','☁️','Disconnetti','var(--ink)',ok=>{if(!ok)return;gistClearCfg();cloudBadge('off');renderSettings();toast('Cloud disconnesso');});}
 
+/* ================= FRASI FILOSOFICHE (login) ================= */
+const GW_QUOTES=[
+  ["Scegli un lavoro che ami, e non lavorerai mai.","Confucio"],
+  ["Il lavoro tiene lontani tre grandi mali: la noia, il vizio e il bisogno.","Voltaire"],
+  ["Fatti non foste a viver come bruti, ma per seguir virtute e canoscenza.","Dante Alighieri"],
+  ["Niente di grande è stato fatto senza passione.","Hegel"],
+  ["Il segreto per andare avanti è cominciare.","Mark Twain"],
+  ["Il genio è uno per cento ispirazione e novantanove per cento sudore.","Thomas Edison"],
+  ["Fai di ogni giornata il tuo capolavoro.","John Wooden"],
+  ["Chi ben comincia è a metà dell'opera.","Proverbio"],
+  ["La fortuna aiuta gli audaci.","Proverbio"],
+  ["La qualità non è un atto, è un'abitudine.","Aristotele"],
+  ["Non contare i giorni, fai in modo che i giorni contino.","Muhammad Ali"],
+  ["La calma è la virtù dei forti.","Proverbio"]
+];
+let _qIdx=Math.floor(Math.random()*GW_QUOTES.length);
+function setQuote(){
+  const el=document.getElementById('loginQuote');if(!el)return;
+  const q=GW_QUOTES[_qIdx%GW_QUOTES.length];_qIdx++;
+  el.style.opacity=0;
+  setTimeout(()=>{el.innerHTML='«'+q[0]+'»<span class="qa">— '+q[1]+'</span>';el.style.opacity=1;},250);
+}
+setInterval(()=>{if(document.getElementById('loginPage').style.display!=='none')setQuote();},9000);
+
 /* ================= BOOT ================= */
 applyTheme();
 (function boot(){
@@ -1168,7 +1338,7 @@ applyTheme();
   const u=last?getUsers().find(x=>x.email===last):null;
   if(u){enterApp(u);}
   else{
-    document.getElementById('loginPage').style.display='flex';showProfiles();
+    document.getElementById('loginPage').style.display='flex';showProfiles();setQuote();
     gistLoadCfg();
     if(_gToken&&_gId){gistInit().then(()=>{if(!currentUser)showProfiles();});}
   }
