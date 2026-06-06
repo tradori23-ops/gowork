@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v17';
+  var BUILD='20260606-gw-v18';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -84,7 +84,7 @@ body{
 }
 h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;font-weight:700;margin:0}
 .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
-.app{max-width:560px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom)) 16px}
+.app{max-width:560px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(96px + env(safe-area-inset-bottom)) 16px}
 
 /* ===== Schermi larghi (desktop / iPad): riempi lo spazio ===== */
 @media(min-width:768px){
@@ -179,7 +179,7 @@ html[data-theme="dark"] .btn-go{color:#06140d}
 .caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
 .caldow span{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.calcell{aspect-ratio:1/1.05;border:1px solid var(--line);border-radius:11px;padding:5px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:.12s;background:var(--card);overflow:hidden;position:relative}
+.calcell{min-height:60px;border:1px solid var(--line);border-radius:11px;padding:5px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;transition:.12s;background:var(--card);overflow:hidden;position:relative}
 .calcell:active{transform:scale(.95)}
 .calcell.empty{border:none;background:none;cursor:default}
 .calcell.oggi{border-color:var(--go);box-shadow:inset 0 0 0 1px var(--go)}
@@ -188,6 +188,7 @@ html[data-theme="dark"] .btn-go{color:#06140d}
 .calcell .ch{font-size:9px;color:var(--go);font-family:'JetBrains Mono';font-weight:700;margin-top:1px}
 .caldots{display:flex;gap:2px;margin-top:auto;flex-wrap:wrap;justify-content:center;padding-bottom:1px}
 .caldots i{width:5px;height:5px;border-radius:50%;display:inline-block}
+.callbl{font-size:8px;line-height:1.12;font-weight:700;text-align:center;width:100%;padding:0 1px;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .callegend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:14px;font-size:11px;color:var(--muted)}
 .callegend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
 @media(min-width:880px){.calcell .cd{font-size:15px}.calcell .ch{font-size:11px}}
@@ -238,7 +239,7 @@ html[data-theme="dark"] .segbtns button.on{color:#0b0d10}
 .spacer{flex:1}
 
 /* ===== Pagina di accesso ===== */
-#loginPage{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+#loginPage{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)) 24px;overflow-y:auto}
 .loginbg{position:fixed;inset:0;background:var(--bg);background-image:radial-gradient(circle at 18% 8%,var(--go-soft),transparent 42%),radial-gradient(circle at 88% 92%,var(--ferie-soft),transparent 40%);z-index:-1}
 .loginwrap{width:100%;max-width:380px;animation:fade .4s}
 .loginbrand{text-align:center;margin-bottom:28px}
@@ -321,7 +322,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v17 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v18 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -556,7 +557,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v17 · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v18 · by Sergio</div>
   </section>
 </div>
 
@@ -619,6 +620,7 @@ function persistCloud(obj){D=obj;localStorage.setItem(dataKey(),JSON.stringify(D
 
 /* ================= UTILITY ================= */
 const pad=n=>String(n).padStart(2,'0');
+function escH(s){return (s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
 function isoDay(d=new Date()){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function parseDay(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
 function hm(ms){const t=Math.max(0,Math.round(ms/1000));const h=Math.floor(t/3600),m=Math.floor((t%3600)/60);return h+':'+pad(m);}
@@ -828,14 +830,19 @@ function renderRegistro(){
   for(let d=1;d<=lastDay;d++){
     const iso=y+'-'+pad(m+1)+'-'+pad(d);
     const g=D.giornate[iso];const ms=g?g.sessioni.reduce((a,s)=>a+sessDurMs(s),0):0;
-    const imp=impegniDi(iso).length, ass=assenzeDi(iso);
+    const impList=impegniDi(iso), ass=assenzeDi(iso);
+    let lbl='';
+    if(impList.length){
+      lbl=`<div class="callbl" style="color:var(--rol)">${escH(impList[0].titolo)}${impList.length>1?' +'+(impList.length-1):''}</div>`;
+    }else if(ass.length){
+      const t=TIPI[ass[0].tipo];
+      lbl=`<div class="callbl" style="color:${t.col}">${t.em} ${t.lab}${ass.length>1?' +'+(ass.length-1):''}</div>`;
+    }
     let dots='';
-    if(imp)dots+='<i style="background:var(--rol)"></i>';
-    ass.forEach(a=>{dots+=`<i style="background:${TIPI[a.tipo].col}"></i>`;});
+    if(impList.length&&ass.length){ass.forEach(a=>{dots+=`<i style="background:${TIPI[a.tipo].col}"></i>`;});} // mostra i pallini delle assenze solo se c'è già il titolo impegno
     const dow=parseDay(iso).getDay();
     cells+=`<div class="calcell${iso===oggi?' oggi':''}${(dow===0||dow===6)?' festivo':''}" onclick="openGiorno('${iso}')">
-      <div class="cd">${d}</div>${ms?`<div class="ch">${hm(ms)}</div>`:''}
-      <div class="caldots">${dots}</div></div>`;
+      <div class="cd">${d}</div>${ms?`<div class="ch">${hm(ms)}</div>`:''}${lbl}${dots?`<div class="caldots">${dots}</div>`:''}</div>`;
   }
   document.getElementById('calGrid').innerHTML=
     '<div class="caldow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span></div>'+
@@ -1219,13 +1226,21 @@ function renderSettings(){
   renderCarriera();
   renderBgSwatches();
   renderHeaderAvatar();
+  // autosave: appena modifichi un campo del profilo/impostazioni, salva da solo
+  const sv=document.getElementById('view-set');
+  if(sv&&!sv._autowired){
+    sv._autowired=true;
+    sv.addEventListener('input',e=>{if(e.target.matches('input,textarea,select'))scheduleSettingsSave();});
+    sv.addEventListener('change',e=>{if(e.target.matches('input,select'))scheduleSettingsSave();});
+  }
 }
 function toggleDay(d,btn){
   const arr=D.settings.giorniLavorativi;const i=arr.indexOf(d);
   if(i>=0)arr.splice(i,1);else arr.push(d);
   btn.className=arr.includes(d)?'on ferie':'';
+  save();renderOggi();
 }
-function saveSettings(){
+function collectSettings(){
   const s=D.settings,p=D.profile;
   p.nome=document.getElementById('setNome').value;
   p.professione=document.getElementById('setProf').value;
@@ -1244,8 +1259,14 @@ function saveSettings(){
   s.rolIniziali=parseFloat(document.getElementById('setRolIni').value)||0;
   s.rolMese=parseFloat(document.getElementById('setRolMese').value)||0;
   s.permessiRetr=parseFloat(document.getElementById('setPermr').value)||0;
-  save();renderOggi();renderPensione();renderCarriera();toast('Impostazioni salvate');
+  save();
+  // aggiorno il nome mostrato nella card account, se serve
+  const an=document.getElementById('accName');if(an&&currentUser)an.textContent=currentUser.name||p.nome||'Profilo';
 }
+let _setSaveTimer=null;
+function scheduleSettingsSave(){clearTimeout(_setSaveTimer);_setSaveTimer=setTimeout(()=>{collectSettings();renderPensione();renderCarriera();},500);}
+function saveSettings(){collectSettings();renderOggi();renderPensione();renderCarriera();toast('Impostazioni salvate ✓');}
+function flushSettings(){const sv=document.getElementById('view-set');if(sv&&sv.classList.contains('active')&&currentUser){clearTimeout(_setSaveTimer);collectSettings();}}
 function exportData(){
   const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -1260,7 +1281,7 @@ function resetAll(){gwAsk('Cancellare TUTTI i dati di questo profilo? Operazione
 
 /* ================= AVVIO ================= */
 // ricalcola il tempo quando si riapre l'app (anche dopo cell. spento): i timestamp restano corretti
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderOggi();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSettings();else renderOggi();});
 window.addEventListener('focus',renderOggi);
 /* ================= AUTH FLOW ================= */
 const GW_EMAILJS={serviceId:'',templateId:'',publicKey:''}; // ← inserisci i tuoi ID EmailJS per le email di benvenuto
@@ -1443,8 +1464,8 @@ async function gistPull(onDone){
 }
 function schedulePush(){if(!gistReady)return;clearTimeout(_gPushTimer);_gPushTimer=setTimeout(()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();},1500);}
 function refreshAll(){mirrorLoginBg();renderOggi();const v=document.querySelector('.view.active');if(v){const id=v.id.replace('view-','');if(id==='registro')renderRegistro();if(id==='diario')renderDiario();if(id==='assenze')renderAssenze();if(id==='riep')renderRiep();if(id==='set')renderSettings();}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gistReady&&currentUser&&!_gSyncing){clearTimeout(_gPushTimer);gistPush();}});
-window.addEventListener('pagehide',()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){flushSettings();if(gistReady&&currentUser&&!_gSyncing){clearTimeout(_gPushTimer);gistPush();}}});
+window.addEventListener('pagehide',()=>{flushSettings();if(gistReady&&currentUser&&!_gSyncing)gistPush();});
 
 /* azioni UI — schermata di accesso */
 function toggleLgSync(){const b=document.getElementById('lgSync');b.style.display=b.style.display==='none'?'block':'none';}
