@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v18';
+  var BUILD='20260606-gw-v20';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -268,6 +268,8 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 .loginmsg{text-align:center;font-size:13.5px;font-weight:600;margin-top:14px;min-height:18px}
 .loginmsg.error{color:var(--permr)} .loginmsg.ok{color:var(--go)} .loginmsg.info{color:var(--muted)}
 .loginfoot{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;letter-spacing:.04em}
+.loginfoot a{color:var(--go);font-weight:700;text-decoration:none;border-bottom:1px solid transparent;transition:.15s}
+.loginfoot a:active{opacity:.7;border-bottom-color:var(--go)}
 .loginquote{text-align:center;font-family:'Bricolage Grotesque',serif;font-style:italic;font-size:15px;line-height:1.5;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:-8px 0 22px;box-shadow:var(--shadow);min-height:24px;transition:opacity .5s}
 .loginquote .qa{display:block;font-style:normal;font-family:'Manrope';font-size:12px;font-weight:700;color:var(--go);margin-top:8px;letter-spacing:.03em}
 </style>
@@ -322,7 +324,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v18 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v20</span></div>
   </div>
 </div>
 
@@ -557,7 +559,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v18 · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v20 · by Sergio</div>
   </section>
 </div>
 
@@ -1606,6 +1608,7 @@ setInterval(()=>{if(document.getElementById('loginPage').style.display!=='none')
 applyTheme();
 applyLoginBg();
 (function boot(){
+  const lv=document.getElementById('loginVer');if(lv)lv.textContent=(BUILD.split('-').pop()||'v18');
   const last=localStorage.getItem('gw_current');
   const u=last?getUsers().find(x=>x.email===last):null;
   if(u){enterApp(u);}
