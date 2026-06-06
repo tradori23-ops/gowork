@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v15';
+  var BUILD='20260606-gw-v17';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -212,6 +212,8 @@ label.f{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin
 input,select,textarea{width:100%;font-family:'Manrope';font-size:16px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);transition:.15s}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--go);box-shadow:0 0 0 3px var(--go-soft)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.datesel{display:grid;grid-template-columns:1fr 1.25fr 0.9fr;gap:8px}
+.datesel select,.datesel input{padding-left:10px;padding-right:6px}
 .segbtns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
 .segbtns button{padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-family:'Manrope';font-weight:600;font-size:13px;cursor:pointer;color:var(--ink);transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
 .segbtns button.on{border-color:transparent;color:#fff;font-weight:700}
@@ -319,7 +321,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v15 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v17 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -488,7 +490,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
         <div><label class="f">Mensilità</label><select id="setMens"><option value="12">12</option><option value="13">13</option><option value="14">14</option></select></div>
       </div>
       <label class="f">Data inizio lavoro (attuale)</label>
-      <input type="date" id="setInizioLav">
+      <div id="setInizioLavSel"></div>
       <div id="anzianitaOut"></div>
     </div>
 
@@ -502,7 +504,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <h2>Pensione — stima</h2>
       <div class="sub">Indicazione orientativa, non ufficiale</div>
       <div class="f2">
-        <div><label class="f">Data di nascita</label><input type="date" id="setNascita"></div>
+        <div><label class="f">Data di nascita</label><div id="setNascitaSel"></div></div>
         <div><label class="f">Contributi precedenti (anni)</label><input type="number" id="setContrib" step="0.5" min="0" placeholder="0"></div>
       </div>
       <div id="pensioneOut"></div>
@@ -554,7 +556,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v15 · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v17 · by Sergio</div>
   </section>
 </div>
 
@@ -862,15 +864,16 @@ function openGiorno(iso){
 function openImpegno(iso,id){
   const x=id?D.impegni.find(i=>i.id===id):null;
   openSheet(`<h3>${x?'Modifica':'Nuovo'} impegno</h3>
-    <label class="f">Data</label><input type="date" id="imDate" value="${x?x.data:iso}">
-    <div class="f2"><div><label class="f">Ora (opz.)</label><input type="time" id="imOra" value="${x?x.ora||'':''}"></div>
+    <label class="f">Data</label><div id="imDateSel"></div>
+    <div class="f2" style="margin-top:10px"><div><label class="f">Ora (opz.)</label><input type="time" id="imOra" value="${x?x.ora||'':''}"></div>
     <div><label class="f">Titolo</label><input id="imTit" value="${x?(x.titolo||'').replace(/"/g,'&quot;'):''}" placeholder="es. Visita medica"></div></div>
     <label class="f">Note</label><textarea id="imNote" rows="3">${x?x.note||'':''}</textarea>
     <button class="btn btn-go btn-block" style="margin-top:14px" onclick="saveImpegno('${id||''}')">Salva</button>
     ${x?`<button class="btn btn-block danger" style="background:var(--permr-soft);margin-top:8px" onclick="delImpegno('${id}')">Elimina</button>`:''}`);
+  buildDateSel('imDateSel','imDate',x?x.data:iso);
 }
 function saveImpegno(id){
-  const data=document.getElementById('imDate').value;if(!data)return toast('Inserisci la data');
+  const data=readDateSel('imDate');if(!data)return toast('Inserisci la data');
   const o={id:id||('i'+Date.now()),data,ora:document.getElementById('imOra').value,titolo:document.getElementById('imTit').value.trim()||'Impegno',note:document.getElementById('imNote').value.trim()};
   if(!D.impegni)D.impegni=[];
   if(id){const i=D.impegni.findIndex(x=>x.id===id);D.impegni[i]=o;}else D.impegni.push(o);
@@ -950,14 +953,15 @@ function renderDiario(){
 }
 function openDiario(){
   openSheet(`<h3>Nuova attività</h3>
-    <label class="f">Data</label><input type="date" id="dDate" value="${isoDay()}">
+    <label class="f">Data</label><div id="dDateSel"></div>
     <label class="f">Titolo</label><input id="dTit" placeholder="es. Riunione team / Report mensile">
     <label class="f">Dettagli</label><textarea id="dTxt" rows="4" placeholder="Cosa hai fatto, note, idee…"></textarea>
     <label class="f">Ore dedicate (opz.)</label><input type="number" id="dOre" step="0.5" min="0" placeholder="0">
     <button class="btn btn-go btn-block" style="margin-top:16px" onclick="saveDiario()">Salva</button>`);
+  buildDateSel('dDateSel','dDate',isoDay());
 }
 function saveDiario(id){
-  const data=document.getElementById('dDate').value;if(!data)return toast('Inserisci la data');
+  const data=readDateSel('dDate');if(!data)return toast('Inserisci la data');
   const o={id:id||('d'+Date.now()),data,titolo:document.getElementById('dTit').value.trim()||'Attività',testo:document.getElementById('dTxt').value.trim(),ore:parseFloat(document.getElementById('dOre').value||0)};
   if(!D.diario)D.diario=[];
   if(id){const i=D.diario.findIndex(x=>x.id===id);D.diario[i]=o;}else D.diario.push(o);
@@ -966,12 +970,13 @@ function saveDiario(id){
 function editDiario(id){
   const d=D.diario.find(x=>x.id===id);if(!d)return;
   openSheet(`<h3>Modifica attività</h3>
-    <label class="f">Data</label><input type="date" id="dDate" value="${d.data}">
+    <label class="f">Data</label><div id="dDateSel"></div>
     <label class="f">Titolo</label><input id="dTit" value="${(d.titolo||'').replace(/"/g,'&quot;')}">
     <label class="f">Dettagli</label><textarea id="dTxt" rows="4">${d.testo||''}</textarea>
     <label class="f">Ore dedicate (opz.)</label><input type="number" id="dOre" step="0.5" min="0" value="${d.ore||''}">
     <button class="btn btn-go btn-block" style="margin-top:16px" onclick="saveDiario('${id}')">Salva</button>
     <button class="btn btn-block danger" style="background:var(--permr-soft);margin-top:8px" onclick="delDiario('${id}')">Elimina</button>`);
+  buildDateSel('dDateSel','dDate',d.data);
 }
 function delDiario(id){gwAsk('Eliminare questa attività?','🗑️','Elimina',null,ok=>{if(!ok)return;D.diario=D.diario.filter(x=>x.id!==id);save();closeSheet();renderDiario();toast('Eliminata');});}
 
@@ -1061,15 +1066,16 @@ function gwResolve(res){document.getElementById('gwConfirm').classList.remove('s
 function openTimbra(iso){
   const today=iso||isoDay();
   openSheet(`<h3>Aggiungi giornata</h3>
-    <label class="f">Data</label><input type="date" id="tDate" value="${today}">
-    <div class="f2"><div><label class="f">Entrata</label><input type="time" id="tIn" value="09:00"></div>
+    <label class="f">Data</label><div id="tDateSel"></div>
+    <div class="f2" style="margin-top:10px"><div><label class="f">Entrata</label><input type="time" id="tIn" value="09:00"></div>
     <div><label class="f">Uscita</label><input type="time" id="tOut" value="18:00"></div></div>
     <label class="f">Pausa (minuti)</label><input type="number" id="tPause" value="60" min="0">
     <label class="f">Nota (opz.)</label><input id="tNote" placeholder="es. trasferta">
     <button class="btn btn-go btn-block" style="margin-top:18px" onclick="saveTimbra()">Salva giornata</button>`);
+  buildDateSel('tDateSel','tDate',today);
 }
 function saveTimbra(){
-  const date=document.getElementById('tDate').value;const i=document.getElementById('tIn').value;const o=document.getElementById('tOut').value;
+  const date=readDateSel('tDate');const i=document.getElementById('tIn').value;const o=document.getElementById('tOut').value;
   if(!date||!i||!o)return toast('Compila i campi');
   const inizio=new Date(date+'T'+i);let fine=new Date(date+'T'+o);
   if(fine<=inizio)fine.setDate(fine.getDate()+1); // turno oltre mezzanotte
@@ -1090,16 +1096,17 @@ function editSessione(iso,i){
   const x=D.giornate[iso].sessioni[i];const e=new Date(x.inizio),u=new Date(x.fine);
   const pm=Math.round(pauseMs(x.pause,new Date())/60000);
   openSheet(`<h3>Modifica sessione</h3>
-    <label class="f">Data</label><input type="date" id="eDate" value="${isoDay(e)}">
-    <div class="f2"><div><label class="f">Entrata</label><input type="time" id="eIn" value="${pad(e.getHours())}:${pad(e.getMinutes())}"></div>
+    <label class="f">Data</label><div id="eDateSel"></div>
+    <div class="f2" style="margin-top:10px"><div><label class="f">Entrata</label><input type="time" id="eIn" value="${pad(e.getHours())}:${pad(e.getMinutes())}"></div>
     <div><label class="f">Uscita</label><input type="time" id="eOut" value="${pad(u.getHours())}:${pad(u.getMinutes())}"></div></div>
     <label class="f">Pausa (minuti)</label><input type="number" id="ePause" value="${pm}" min="0">
     <label class="f">Nota</label><input id="eNote" value="${x.note||''}">
     <button class="btn btn-go btn-block" style="margin-top:18px" onclick="saveSessione('${iso}',${i})">Salva</button>
     <button class="btn btn-block danger" style="background:var(--permr-soft);margin-top:8px" onclick="delSessione('${iso}',${i})">Elimina sessione</button>`);
+  buildDateSel('eDateSel','eDate',isoDay(e));
 }
 function saveSessione(iso,i){
-  const date=document.getElementById('eDate').value;
+  const date=readDateSel('eDate');if(!date)return toast('Inserisci la data');
   const inizio=new Date(date+'T'+document.getElementById('eIn').value);
   let fine=new Date(date+'T'+document.getElementById('eOut').value);
   if(fine<=inizio)fine.setDate(fine.getDate()+1);
@@ -1136,23 +1143,26 @@ function renderAssFields(id){
   const a = id? D.assenze.find(x=>x.id===id):null;
   if(assTipo==='ferie'){
     document.getElementById('assFields').innerHTML=`
-      <div class="f2"><div><label class="f">Dal</label><input type="date" id="aD1" value="${a?a.dataInizio:today}"></div>
-      <div><label class="f">Al</label><input type="date" id="aD2" value="${a&&a.dataFine?a.dataFine:(a?a.dataInizio:today)}"></div></div>
+      <div class="f2"><div><label class="f">Dal</label><div id="aD1sel"></div></div>
+      <div><label class="f">Al</label><div id="aD2sel"></div></div></div>
       <div class="toggle" style="border:none"><div><b>Mezza giornata</b><div class="sub" style="margin:0">solo se un giorno solo</div></div>
       <div class="sw ${a&&!a.giornataIntera?'on':''}" id="aHalf" onclick="this.classList.toggle('on')"></div></div>
       <label class="f">Nota</label><input id="aNote" value="${a?a.note||'':''}">`;
+    buildDateSel('aD1sel','aD1',a?a.dataInizio:today);
+    buildDateSel('aD2sel','aD2',a&&a.dataFine?a.dataFine:(a?a.dataInizio:today));
   }else{
     const u=TIPI[assTipo].lab;
     document.getElementById('assFields').innerHTML=`
-      <label class="f">Data</label><input type="date" id="aD1" value="${a?a.dataInizio:today}">
+      <label class="f">Data</label><div id="aD1sel"></div>
       <label class="f">Ore di ${u.toLowerCase()}</label><input type="number" id="aOre" step="0.5" min="0" value="${a?a.ore||1:1}">
       <label class="f">Nota</label><input id="aNote" value="${a?a.note||'':''}">`;
+    buildDateSel('aD1sel','aD1',a?a.dataInizio:today);
   }
 }
 function saveAssenza(id){
-  const d1=document.getElementById('aD1').value;if(!d1)return toast('Inserisci la data');
+  const d1=readDateSel('aD1');if(!d1)return toast('Inserisci la data');
   const a={id:id||('a'+Date.now()),tipo:assTipo,dataInizio:d1,note:document.getElementById('aNote').value||''};
-  if(assTipo==='ferie'){a.dataFine=document.getElementById('aD2').value||d1;a.giornataIntera=!document.getElementById('aHalf').classList.contains('on');}
+  if(assTipo==='ferie'){a.dataFine=readDateSel('aD2')||d1;a.giornataIntera=!document.getElementById('aHalf').classList.contains('on');}
   else{a.ore=parseFloat(document.getElementById('aOre').value||0);a.dataFine=d1;a.giornataIntera=true;}
   if(id){const i=D.assenze.findIndex(x=>x.id===id);D.assenze[i]=a;}else D.assenze.push(a);
   save();closeSheet();renderOggi();renderAssenze();toast('Richiesta salvata');
@@ -1188,9 +1198,9 @@ function renderSettings(){
   document.getElementById('setCcnl').value=p.ccnl||'';
   document.getElementById('setStip').value=p.stipendio||'';
   document.getElementById('setMens').value=p.mensilita||13;
-  document.getElementById('setNascita').value=p.dataNascita||'';
+  buildDateSel('setNascitaSel','setNascita',p.dataNascita||'');
   document.getElementById('setContrib').value=p.anniContributi||'';
-  document.getElementById('setInizioLav').value=p.dataInizioLavoro||'';
+  buildDateSel('setInizioLavSel','setInizioLav',p.dataInizioLavoro||'');
   document.getElementById('setOreGg').value=s.oreGiornaliere;
   document.getElementById('setOreSett').value=s.oreSettimanali;
   document.getElementById('setFerieIni').value=s.ferieIniziali;
@@ -1224,9 +1234,9 @@ function saveSettings(){
   p.ccnl=document.getElementById('setCcnl').value;
   p.stipendio=parseFloat(document.getElementById('setStip').value)||0;
   p.mensilita=parseInt(document.getElementById('setMens').value)||13;
-  p.dataNascita=document.getElementById('setNascita').value;
+  p.dataNascita=readDateSel('setNascita');
   p.anniContributi=parseFloat(document.getElementById('setContrib').value)||0;
-  p.dataInizioLavoro=document.getElementById('setInizioLav').value;
+  p.dataInizioLavoro=readDateSel('setInizioLav');
   s.oreGiornaliere=parseFloat(document.getElementById('setOreGg').value)||8;
   s.oreSettimanali=parseFloat(document.getElementById('setOreSett').value)||40;
   s.ferieIniziali=parseFloat(document.getElementById('setFerieIni').value)||0;
@@ -1476,6 +1486,25 @@ function resizeImage(file,maxDim,q){
   });
 }
 function avatarBg(u){return u&&u.foto?`background-image:url('${u.foto}');background-size:cover;background-position:center`:'';}
+/* selettore data: giorno+mese a tendina, anno digitabile */
+function buildDateSel(containerId,baseId,value){
+  const c=document.getElementById(containerId);if(!c)return;
+  let g='',m='',a='';if(value){const p=value.split('-');a=p[0];m=p[1];g=p[2];}
+  const giorni=Array.from({length:31},(_,i)=>pad(i+1)).map(d=>`<option value="${d}" ${d===g?'selected':''}>${parseInt(d)}</option>`).join('');
+  const mesiOpt=MESI.map((nm,i)=>{const v=pad(i+1);return `<option value="${v}" ${v===m?'selected':''}>${nm.charAt(0).toUpperCase()+nm.slice(1)}</option>`;}).join('');
+  c.innerHTML=`<div class="datesel">
+    <select id="${baseId}_g"><option value="">Giorno</option>${giorni}</select>
+    <select id="${baseId}_m"><option value="">Mese</option>${mesiOpt}</select>
+    <input type="number" id="${baseId}_a" placeholder="Anno" min="1930" max="${new Date().getFullYear()+10}" value="${a||''}">
+  </div>`;
+}
+function readDateSel(baseId){
+  const g=document.getElementById(baseId+'_g'),m=document.getElementById(baseId+'_m'),a=document.getElementById(baseId+'_a');
+  if(!g||!m||!a||!g.value||!m.value||!a.value)return '';
+  let day=parseInt(g.value),mon=parseInt(m.value),yr=parseInt(a.value);
+  const last=new Date(yr,mon,0).getDate();if(day>last)day=last;   // es. 31 feb → 28/29
+  return yr+'-'+pad(mon)+'-'+pad(day);
+}
 function renderHeaderAvatar(){
   const a=document.getElementById('headerAvatar');if(!a||!currentUser)return;
   if(currentUser.foto){a.style.backgroundImage=`url('${currentUser.foto}')`;a.textContent='';}
