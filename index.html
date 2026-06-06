@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v10';
+  var BUILD='20260606-gw-v15';
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -87,14 +87,13 @@ h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.
 .app{max-width:560px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom)) 16px}
 
 /* ===== Schermi larghi (desktop / iPad): riempi lo spazio ===== */
-@media(min-width:880px){
+@media(min-width:768px){
   .app{max-width:1000px;padding-left:28px;padding-right:28px}
   header{padding-top:26px}
   .view.active{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
   .view.active>.card{margin-bottom:0}
   .view.active>.clockcard,
   .view.active>.fullspan{grid-column:1 / -1}
-  nav.tabbar{max-width:1000px;left:50%;transform:translateX(-50%);border-radius:18px 18px 0 0}
 }
 @media(min-width:1180px){
   .app{max-width:1120px}
@@ -106,6 +105,9 @@ h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 12px}
 .brand{display:flex;align-items:center;gap:10px}
 .hlogo{width:44px;height:44px;object-fit:contain;flex:none}
+.havatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--go),var(--go-deep));color:#fff;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;cursor:pointer;background-size:cover;background-position:center;flex:none;box-shadow:var(--shadow);transition:.15s}
+.havatar:active{transform:scale(.92)}
+html[data-theme="dark"] .havatar{color:#06140d}
 .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--go),var(--go-deep));display:grid;place-items:center;color:#fff;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;box-shadow:var(--shadow)}
 html[data-theme="dark"] .logo{color:#06140d}
 .brand b{font-family:'Bricolage Grotesque';font-size:22px;font-weight:800}
@@ -193,7 +195,8 @@ html[data-theme="dark"] .btn-go{color:#06140d}
 
 /* Nav bar */
 nav.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:40;box-shadow:0 -8px 24px -18px rgba(0,0,0,.4)}
-nav.tabbar button{flex:1;background:none;border:none;color:var(--muted);font-family:'Manrope';font-weight:600;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 2px;border-radius:12px;transition:.15s}
+nav.tabbar button{flex:1;min-width:0;background:none;border:none;color:var(--muted);font-family:'Manrope';font-weight:600;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 1px;border-radius:12px;transition:.15s;white-space:nowrap;overflow:hidden}
+@media(max-width:400px){nav.tabbar button{font-size:9px;gap:2px} nav.tabbar button .ic{font-size:18px}}
 nav.tabbar button .ic{font-size:20px;line-height:1}
 nav.tabbar button.active{color:var(--go)}
 nav.tabbar button.active .ic{transform:translateY(-1px)}
@@ -251,7 +254,11 @@ html[data-theme="dark"] .loginlogo{filter:drop-shadow(0 8px 20px rgba(0,0,0,.55)
 .pwrap{position:relative}
 .pwrap input{padding-right:84px}
 .pweye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--go);font-family:'Manrope';font-weight:700;font-size:13px;cursor:pointer;padding:8px 10px}
-.profcard .av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--go),var(--go-deep));color:#fff;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;margin:0 auto 8px}
+.profcard .av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--go),var(--go-deep));color:#fff;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;margin:0 auto 8px;background-size:cover;background-position:center}
+.bgswrap{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.bgsw{width:62px;height:46px;border-radius:12px;border:2px solid var(--line);cursor:pointer;background-size:cover!important;background-position:center;display:grid;place-items:center;font-size:18px;transition:.15s}
+.bgsw.on{border-color:var(--go);box-shadow:0 0 0 3px var(--go-soft)}
+.bgsw.bgimg{background:var(--bg2)}
 html[data-theme="dark"] .profcard .av{color:#06140d}
 .profcard .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .linkbtn{display:block;width:100%;background:none;border:none;color:var(--go);font-family:'Manrope';font-weight:700;font-size:14px;cursor:pointer;padding:14px;margin-top:6px}
@@ -312,7 +319,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">GoWork v10 · dati salvati sul dispositivo</div>
+    <div class="loginfoot">GoWork v15 · dati salvati sul dispositivo</div>
   </div>
 </div>
 
@@ -323,6 +330,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div><b>GoWork</b><small>Gestione orari</small></div>
     </div>
     <div class="flex" style="gap:8px">
+      <div class="havatar" id="headerAvatar" onclick="go('set')" title="Profilo">S</div>
       <button class="icbtn" id="cloudBtn" onclick="go('set')" title="Sincronizzazione" data-state="off">☁️</button>
       <button class="icbtn" id="themeBtn" title="Tema">◐</button>
     </div>
@@ -439,10 +447,15 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
   <section class="view" id="view-set">
     <div class="card fullspan">
       <div class="flex">
-        <div class="logo" style="width:44px;height:44px;border-radius:13px;font-size:22px" id="accAvatar">G</div>
+        <div class="logo" style="width:48px;height:48px;border-radius:14px;font-size:22px;background-size:cover;background-position:center;cursor:pointer" id="accAvatar" onclick="document.getElementById('fotoFile').click()">G</div>
         <div style="min-width:0"><b id="accName" style="font-family:'Bricolage Grotesque';font-size:17px"></b><div class="sub" id="accEmail" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
         <span class="spacer"></span>
         <button class="btn btn-ghost btn-sm" onclick="logout()">Esci</button>
+      </div>
+      <input type="file" id="fotoFile" accept="image/*" style="display:none" onchange="uploadFoto(this)">
+      <div class="flex" style="gap:8px;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center" onclick="document.getElementById('fotoFile').click()">📷 Cambia foto</button>
+        <button class="btn btn-ghost btn-sm" onclick="removeFoto()">Rimuovi</button>
       </div>
     </div>
     <div class="card">
@@ -527,6 +540,12 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">Crea un <b>token GitHub</b> con permesso <b>gist</b> (github.com → Settings → Developer settings → Personal access tokens). Il Gist è <b>privato</b>. Lo stesso token + ID su un altro dispositivo recupera i tuoi dati.</div>
     </div>
     <div class="card">
+      <h2>Sfondo accesso</h2>
+      <div class="sub">Personalizza la pagina di login (su questo dispositivo)</div>
+      <div id="bgSwatches" class="bgswrap"></div>
+      <input type="file" id="bgFile" accept="image/*" style="display:none" onchange="uploadLoginBg(this)">
+    </div>
+    <div class="card">
       <h2>Dati & backup</h2>
       <div class="toggle"><div><b>Backup</b><div class="sub" style="margin:0">Esporta tutti i dati in un file</div></div><button class="btn btn-ghost btn-sm" onclick="exportData()">Esporta</button></div>
       <div class="toggle"><div><b>Ripristino</b><div class="sub" style="margin:0">Importa da un backup</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">Importa</button></div>
@@ -535,7 +554,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v10 · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v15 · by Sergio</div>
   </section>
 </div>
 
@@ -579,7 +598,7 @@ const DEFAULTS=()=>({
   settings:{
     oreGiornaliere:8, oreSettimanali:40, giorniLavorativi:[1,2,3,4,5],
     ferieIniziali:26, ferieMese:0, rolIniziali:0, rolMese:0, permessiRetr:0,
-    tema:'auto'
+    tema:'auto', loginBg:null
   },
   sessione:null,            // {inizio, pause:[{inizio,fine}], note}
   giornate:{},              // 'YYYY-MM-DD': {sessioni:[{inizio,fine,note}]}
@@ -1157,7 +1176,9 @@ function renderSettings(){
   if(currentUser){
     document.getElementById('accName').textContent=currentUser.name||'Profilo';
     document.getElementById('accEmail').textContent=currentUser.email;
-    document.getElementById('accAvatar').textContent=(currentUser.name||currentUser.email)[0].toUpperCase();
+    const acc=document.getElementById('accAvatar');
+    if(currentUser.foto){acc.style.backgroundImage=`url('${currentUser.foto}')`;acc.textContent='';}
+    else{acc.style.backgroundImage='';acc.textContent=(currentUser.name||currentUser.email)[0].toUpperCase();}
   }
   document.getElementById('setNome').value=D.profile.nome||'';
   const p=D.profile;
@@ -1186,6 +1207,8 @@ function renderSettings(){
     `<button class="${s.giorniLavorativi.includes(d)?'on ferie':''}" data-d="${d}" onclick="toggleDay(${d},this)">${GG[d]}</button>`).join('');
   renderPensione();
   renderCarriera();
+  renderBgSwatches();
+  renderHeaderAvatar();
 }
 function toggleDay(d,btn){
   const arr=D.settings.giorniLavorativi;const i=arr.indexOf(d);
@@ -1250,7 +1273,7 @@ function renderProfilesGrid(){
     const del=manageMode?`<div class="profdel" onclick="event.stopPropagation();askDeleteProfile('${u.email}')">✕</div>`:'';
     const oc=manageMode?'':`onclick="selectProfile('${u.email}')"`;
     return `<div class="profcard" data-e="${u.email}" ${oc}>${del}
-      <div class="av">${init}</div><div class="nm">${u.name||u.email}</div></div>`;
+      <div class="av" style="${avatarBg(u)}">${u.foto?'':init}</div><div class="nm">${u.name||u.email}</div></div>`;
   }).join('');
 }
 function toggleManage(){
@@ -1317,10 +1340,11 @@ function enterApp(user){
   D=load();
   if(!D.profile.nome){D.profile.nome=user.name||'';}
   save();
+  mirrorLoginBg();
   document.getElementById('loginPage').style.display='none';
   document.querySelector('.app').style.display='block';
   document.getElementById('tabbar').style.display='flex';
-  applyTheme();buildTabs();go('oggi');renderOggi();
+  applyTheme();buildTabs();renderHeaderAvatar();go('oggi');renderOggi();
   gistInit();
 }
 function logout(){
@@ -1408,7 +1432,7 @@ async function gistPull(onDone){
   cloudBadge('ok');if(onDone)onDone();
 }
 function schedulePush(){if(!gistReady)return;clearTimeout(_gPushTimer);_gPushTimer=setTimeout(()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();},1500);}
-function refreshAll(){renderOggi();const v=document.querySelector('.view.active');if(v){const id=v.id.replace('view-','');if(id==='registro')renderRegistro();if(id==='diario')renderDiario();if(id==='assenze')renderAssenze();if(id==='riep')renderRiep();if(id==='set')renderSettings();}}
+function refreshAll(){mirrorLoginBg();renderOggi();const v=document.querySelector('.view.active');if(v){const id=v.id.replace('view-','');if(id==='registro')renderRegistro();if(id==='diario')renderDiario();if(id==='assenze')renderAssenze();if(id==='riep')renderRiep();if(id==='set')renderSettings();}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gistReady&&currentUser&&!_gSyncing){clearTimeout(_gPushTimer);gistPush();}});
 window.addEventListener('pagehide',()=>{if(gistReady&&currentUser&&!_gSyncing)gistPush();});
 
@@ -1439,6 +1463,71 @@ async function settingsGistConnect(){
 function syncNow(){if(!gistReady){stMsg('Prima connetti il cloud.','error');return;}gistPull(()=>{stMsg('✅ Sincronizzato.','ok');toast('Sincronizzato');});}
 function syncDisconnect(){gwAsk('Disconnettere il cloud da questo dispositivo? I dati locali restano.','☁️','Disconnetti','var(--ink)',ok=>{if(!ok)return;gistClearCfg();cloudBadge('off');renderSettings();toast('Cloud disconnesso');});}
 
+/* ================= FOTO PROFILO & SFONDO LOGIN ================= */
+function resizeImage(file,maxDim,q){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>{const img=new Image();img.onload=()=>{
+      let w=img.width,h=img.height;const sc=Math.min(1,maxDim/Math.max(w,h));w=Math.round(w*sc);h=Math.round(h*sc);
+      const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',q));
+    };img.onerror=rej;img.src=r.result;};
+    r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+function avatarBg(u){return u&&u.foto?`background-image:url('${u.foto}');background-size:cover;background-position:center`:'';}
+function renderHeaderAvatar(){
+  const a=document.getElementById('headerAvatar');if(!a||!currentUser)return;
+  if(currentUser.foto){a.style.backgroundImage=`url('${currentUser.foto}')`;a.textContent='';}
+  else{a.style.backgroundImage='';a.textContent=(currentUser.name||currentUser.email)[0].toUpperCase();}
+}
+async function uploadFoto(input){
+  const f=input.files[0];if(!f)return;
+  try{const url=await resizeImage(f,256,.85);
+    currentUser.foto=url;
+    const us=getUsers();const i=us.findIndex(u=>u.email===currentUser.email);if(i>=0){us[i].foto=url;saveUsers(us);}
+    renderSettings();if(typeof gistPush==='function'&&gistReady)gistPush();toast('Foto profilo aggiornata');
+  }catch(e){toast('Immagine non valida');}
+  input.value='';
+}
+function removeFoto(){
+  gwAsk('Rimuovere la foto profilo?','🖼️','Rimuovi',null,ok=>{if(!ok)return;
+    delete currentUser.foto;
+    const us=getUsers();const i=us.findIndex(u=>u.email===currentUser.email);if(i>=0){delete us[i].foto;saveUsers(us);}
+    renderSettings();if(gistReady)gistPush();toast('Foto rimossa');
+  });
+}
+const GW_BG={
+  default:{nome:'GoWork',bg:'var(--bg)',img:'radial-gradient(circle at 18% 8%,var(--go-soft),transparent 42%),radial-gradient(circle at 88% 92%,var(--ferie-soft),transparent 40%)'},
+  foresta:{nome:'Foresta',bg:'#16261d',img:'radial-gradient(circle at 20% 10%,#2f6e49,transparent 50%),radial-gradient(circle at 85% 90%,#0f5a38,transparent 50%)'},
+  tramonto:{nome:'Tramonto',bg:'#2a1726',img:'radial-gradient(circle at 15% 12%,#e0792e,transparent 48%),radial-gradient(circle at 88% 85%,#c0306a,transparent 48%)'},
+  notte:{nome:'Notte',bg:'#0e1330',img:'radial-gradient(circle at 20% 10%,#2b3a8f,transparent 48%),radial-gradient(circle at 85% 88%,#5b2b8f,transparent 48%)'},
+  crema:{nome:'Crema',bg:'#ede8dd',img:'none'}
+};
+function applyLoginBg(){
+  const el=document.querySelector('.loginbg');if(!el)return;
+  let cfg=null;try{cfg=JSON.parse(localStorage.getItem('gw_loginbg'));}catch(e){}
+  if(cfg&&cfg.tipo==='img'){el.style.background='#111';el.style.backgroundImage=`url('${cfg.val}')`;el.style.backgroundSize='cover';el.style.backgroundPosition='center';return;}
+  const k=(cfg&&cfg.tipo==='preset')?cfg.val:'default';const p=GW_BG[k]||GW_BG.default;
+  el.style.background=p.bg;el.style.backgroundImage=p.img;el.style.backgroundSize='';el.style.backgroundPosition='';
+}
+function saveLoginBgCfg(cfg){localStorage.setItem('gw_loginbg',JSON.stringify(cfg));if(currentUser){D.settings.loginBg=cfg;save();}}
+function setLoginBg(k){saveLoginBgCfg({tipo:'preset',val:k});applyLoginBg();renderBgSwatches();}
+async function uploadLoginBg(input){
+  const f=input.files[0];if(!f)return;
+  try{const url=await resizeImage(f,1280,.72);saveLoginBgCfg({tipo:'img',val:url});applyLoginBg();renderBgSwatches();toast('Sfondo aggiornato');}
+  catch(e){toast('Immagine non valida');}
+  input.value='';
+}
+/* allinea lo sfondo salvato nei dati (cloud) alla cache locale del dispositivo */
+function mirrorLoginBg(){if(currentUser&&D.settings&&D.settings.loginBg){try{localStorage.setItem('gw_loginbg',JSON.stringify(D.settings.loginBg));}catch(e){}}applyLoginBg();}
+function renderBgSwatches(){
+  const el=document.getElementById('bgSwatches');if(!el)return;
+  let cur='default';try{const c=JSON.parse(localStorage.getItem('gw_loginbg'));if(c)cur=c.tipo==='img'?'img':c.val;}catch(e){}
+  el.innerHTML=Object.keys(GW_BG).map(k=>`<button class="bgsw${cur===k?' on':''}" title="${GW_BG[k].nome}" onclick="setLoginBg('${k}')" style="background:${GW_BG[k].bg};background-image:${GW_BG[k].img}"></button>`).join('')
+    +`<button class="bgsw bgimg${cur==='img'?' on':''}" title="Immagine" onclick="document.getElementById('bgFile').click()">📷</button>`;
+}
+
 /* ================= FRASI FILOSOFICHE (login) ================= */
 const GW_QUOTES=[
   ["Scegli un lavoro che ami, e non lavorerai mai.","Confucio"],
@@ -1465,6 +1554,7 @@ setInterval(()=>{if(document.getElementById('loginPage').style.display!=='none')
 
 /* ================= BOOT ================= */
 applyTheme();
+applyLoginBg();
 (function boot(){
   const last=localStorage.getItem('gw_current');
   const u=last?getUsers().find(x=>x.email===last):null;
