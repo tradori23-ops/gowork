@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v24';
+  var BUILD='20260606-gw-v25';
   try{window.GW_BUILD=BUILD;}catch(e){}
   try{
     var qp=new URLSearchParams(location.search);
@@ -240,7 +240,7 @@ html[data-theme="dark"] .segbtns button.on{color:#0b0d10}
 .spacer{flex:1}
 
 /* ===== Pagina di accesso ===== */
-#loginPage{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)) 24px;overflow-y:auto}
+#loginPage{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:calc(20px + env(safe-area-inset-top)) 22px calc(20px + env(safe-area-inset-bottom)) 22px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .loginbg{position:fixed;inset:0;background:var(--bg);background-image:radial-gradient(circle at 18% 8%,var(--go-soft),transparent 42%),radial-gradient(circle at 88% 92%,var(--ferie-soft),transparent 40%);z-index:-1}
 .loginwrap{width:100%;max-width:380px;animation:fade .4s}
 .loginbrand{text-align:center;margin-bottom:28px}
@@ -274,7 +274,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 @keyframes gwSceneIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .gw-fire{transform-origin:475px 500px;animation:gwFlicker 1.5s ease-in-out infinite}
 @keyframes gwFlicker{0%,100%{opacity:.82;transform:scaleY(1)}45%{opacity:1;transform:scaleY(1.13)}72%{opacity:.9;transform:scaleY(.95)}}
-.loginwrap{width:100%;max-width:400px;animation:fade .4s;position:relative;z-index:2;border-radius:26px;padding:30px 26px 22px;background:rgba(255,255,255,.66);border:1px solid rgba(120,90,55,.16);box-shadow:0 26px 80px -32px rgba(60,40,25,.55);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
+.loginwrap{width:100%;max-width:400px;animation:fade .4s;position:relative;z-index:2;margin-block:auto;border-radius:26px;padding:28px 24px 20px;background:rgba(255,255,255,.72);border:1px solid rgba(120,90,55,.16);box-shadow:0 26px 80px -32px rgba(60,40,25,.55);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
 html[data-theme="dark"] .loginwrap{background:rgba(16,22,19,.6);border-color:rgba(255,255,255,.12);box-shadow:0 26px 80px -32px rgba(0,0,0,.72)}
 .loginaside{display:none}
 .loginaside .bigword{font-family:'Bricolage Grotesque',serif;font-weight:800;font-size:clamp(54px,6.5vw,92px);line-height:.92;color:#fff;letter-spacing:-.01em;text-shadow:0 6px 30px rgba(0,0,0,.4)}
@@ -402,7 +402,7 @@ html[data-theme="dark"] .loginwrap{background:rgba(16,22,19,.6);border-color:rgb
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v24</span></div>
+    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v25</span></div>
   </div>
 </div>
 
@@ -638,7 +638,7 @@ html[data-theme="dark"] .loginwrap{background:rgba(16,22,19,.6);border-color:rgb
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
     <button class="btn btn-ghost btn-block fullspan" style="margin-top:10px" onclick="checkForUpdate(true)">⬆️ Cerca aggiornamenti</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork <span id="setVer">v24</span> · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork <span id="setVer">v25</span> · by Sergio</div>
   </section>
 </div>
 
@@ -1297,7 +1297,7 @@ function renderSettings(){
   document.getElementById('setRolMese').value=s.rolMese;
   document.getElementById('setPermr').value=s.permessiRetr;
   document.getElementById('dataVer').textContent=D.version;
-  try{const sv=document.getElementById('setVer');if(sv)sv.textContent=((window.GW_BUILD||'gw-v24').split('-').pop());}catch(e){}
+  try{const sv=document.getElementById('setVer');if(sv)sv.textContent=((window.GW_BUILD||'gw-v25').split('-').pop());}catch(e){}
   gistLoadCfg();
   const stId=document.getElementById('stId');if(stId)stId.value=_gId||'';
   const stTk=document.getElementById('stToken');if(stTk){stTk.value='';stTk.placeholder=_gToken?'Token salvato ✓ (lascia vuoto per mantenerlo)':'ghp_…';}
@@ -1765,7 +1765,7 @@ window.addEventListener('online',()=>checkForUpdate(false));
 applyTheme();
 applyLoginBg();
 (function boot(){
-  try{const lv=document.getElementById('loginVer');if(lv)lv.textContent=((window.GW_BUILD||'gw-v24').split('-').pop());}catch(e){}
+  try{const lv=document.getElementById('loginVer');if(lv)lv.textContent=((window.GW_BUILD||'gw-v25').split('-').pop());}catch(e){}
   try{
     const last=localStorage.getItem('gw_current');
     const u=last?getUsers().find(x=>x.email===last):null;
