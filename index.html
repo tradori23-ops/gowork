@@ -4,7 +4,7 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v23';
+  var BUILD='20260606-gw-v24';
   try{window.GW_BUILD=BUILD;}catch(e){}
   try{
     var qp=new URLSearchParams(location.search);
@@ -268,6 +268,28 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 .linkbtn{display:block;width:100%;background:none;border:none;color:var(--go);font-family:'Manrope';font-weight:700;font-size:14px;cursor:pointer;padding:14px;margin-top:6px}
 .loginmsg{text-align:center;font-size:13.5px;font-weight:600;margin-top:14px;min-height:18px}
 .loginmsg.error{color:var(--permr)} .loginmsg.ok{color:var(--go)} .loginmsg.info{color:var(--muted)}
+/* ── Login: scena montagna/camping + card + layout desktop ── */
+.loginscene{position:fixed;left:0;right:0;bottom:0;width:100%;height:46vh;max-height:520px;z-index:-1;pointer-events:none;animation:gwSceneIn 1.1s ease both}
+.loginscene svg{position:absolute;bottom:0;left:0;width:100%;height:100%;display:block}
+@keyframes gwSceneIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.gw-fire{transform-origin:475px 500px;animation:gwFlicker 1.5s ease-in-out infinite}
+@keyframes gwFlicker{0%,100%{opacity:.82;transform:scaleY(1)}45%{opacity:1;transform:scaleY(1.13)}72%{opacity:.9;transform:scaleY(.95)}}
+.loginwrap{width:100%;max-width:400px;animation:fade .4s;position:relative;z-index:2;border-radius:26px;padding:30px 26px 22px;background:rgba(255,255,255,.66);border:1px solid rgba(120,90,55,.16);box-shadow:0 26px 80px -32px rgba(60,40,25,.55);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
+html[data-theme="dark"] .loginwrap{background:rgba(16,22,19,.6);border-color:rgba(255,255,255,.12);box-shadow:0 26px 80px -32px rgba(0,0,0,.72)}
+.loginaside{display:none}
+.loginaside .bigword{font-family:'Bricolage Grotesque',serif;font-weight:800;font-size:clamp(54px,6.5vw,92px);line-height:.92;color:#fff;letter-spacing:-.01em;text-shadow:0 6px 30px rgba(0,0,0,.4)}
+.loginaside .bigword span{color:var(--go);text-shadow:0 6px 30px rgba(0,0,0,.35)}
+.loginaside .bigsub{color:#fff;opacity:.94;font-size:clamp(15px,1.35vw,19px);line-height:1.5;margin-top:16px;max-width:440px;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+.loginaside .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.loginaside .chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:9px 15px;font-size:13.5px;font-weight:600;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-shadow:0 1px 6px rgba(0,0,0,.35)}
+@media(min-width:980px){
+  #loginPage{flex-direction:row;align-items:center;justify-content:center;gap:clamp(40px,6vw,96px);padding-left:6vw;padding-right:6vw}
+  .loginaside{display:flex;flex-direction:column;justify-content:center;flex:1 1 480px;max-width:600px;position:relative;z-index:2}
+  .loginwrap{flex:0 0 420px;max-width:420px;margin:0}
+  .loginwrap .loginbrand p{display:none}
+  .loginlogo{width:140px}
+  .loginscene{height:64vh;max-height:700px}
+}
 .loginfoot{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;letter-spacing:.04em}
 .loginfoot a{color:var(--go);font-weight:700;text-decoration:none;border-bottom:1px solid transparent;transition:.15s}
 .loginfoot a:active{opacity:.7;border-bottom-color:var(--go)}
@@ -287,6 +309,47 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 <!-- ════════ PAGINA DI ACCESSO ════════ -->
 <div id="loginPage">
   <div class="loginbg"></div>
+  <div class="loginscene" aria-hidden="true">
+    <svg viewBox="0 0 1440 540" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gwFireGlow" cx="50%" cy="62%" r="50%">
+          <stop offset="0%" stop-color="#ffb24d" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#ffb24d" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <path d="M0,360 L150,200 L290,300 L430,170 L560,290 L700,180 L860,300 L1010,190 L1160,300 L1300,210 L1440,300 L1440,540 L0,540 Z" fill="#3a5c47" opacity="0.42"/>
+      <path d="M430,170 L452,210 L408,210 Z" fill="#ede8dd" opacity="0.5"/>
+      <path d="M1010,190 L1030,224 L990,224 Z" fill="#ede8dd" opacity="0.5"/>
+      <path d="M0,400 L170,290 L320,370 L470,270 L620,380 L780,280 L940,385 L1110,275 L1280,380 L1440,300 L1440,540 L0,540 Z" fill="#1f3d2c" opacity="0.8"/>
+      <path d="M0,470 C220,445 360,460 560,462 C760,464 940,448 1140,460 C1290,468 1380,462 1440,464 L1440,540 L0,540 Z" fill="#102a1c" opacity="0.94"/>
+      <path d="M120,428 L145,470 L95,470 Z M175,414 L209,470 L141,470 Z M245,430 L269,470 L221,470 Z M905,424 L933,470 L877,470 Z M980,410 L1016,470 L944,470 Z M1060,428 L1085,470 L1035,470 Z M1140,414 L1174,470 L1106,470 Z M1225,430 L1249,470 L1201,470 Z M1330,418 L1361,470 L1299,470 Z" fill="#0c2016" opacity="0.96"/>
+      <path d="M0,492 L1440,480 L1440,540 L0,540 Z" fill="#0a160f"/>
+      <!-- tenda -->
+      <path d="M360,428 L302,500 L418,500 Z" fill="#c2673a"/>
+      <path d="M418,500 L360,428 L388,431 L446,500 Z" fill="#9c4f2c"/>
+      <path d="M360,452 L341,500 L379,500 Z" fill="#46220f"/>
+      <line x1="360" y1="430" x2="360" y2="408" stroke="#6b4a30" stroke-width="3"/>
+      <path d="M360,408 L386,414 L360,420 Z" fill="#e8b04b"/>
+      <!-- falò -->
+      <ellipse cx="475" cy="500" rx="72" ry="30" fill="url(#gwFireGlow)"/>
+      <line x1="455" y1="503" x2="497" y2="497" stroke="#5a3722" stroke-width="5" stroke-linecap="round"/>
+      <line x1="455" y1="497" x2="497" y2="503" stroke="#5a3722" stroke-width="5" stroke-linecap="round"/>
+      <g class="gw-fire">
+        <path d="M475,500 C462,483 470,473 475,463 C480,473 488,483 475,500 Z" fill="#ff7a2f"/>
+        <path d="M475,498 C469,488 472,481 475,474 C478,481 481,488 475,498 Z" fill="#ffd24a"/>
+      </g>
+    </svg>
+  </div>
+  <div class="loginaside" aria-hidden="true">
+    <div class="bigword">Go<span>Work</span></div>
+    <div class="bigsub">Il tuo tempo di lavoro, ferie e permessi — sempre con te, anche offline.</div>
+    <div class="chips">
+      <span class="chip">⏱️ Timbra entrata/uscita</span>
+      <span class="chip">🏖️ Ferie &amp; ROL</span>
+      <span class="chip">📊 Riepilogo mensile</span>
+      <span class="chip">☁️ Backup cloud</span>
+    </div>
+  </div>
   <div class="loginwrap">
     <div class="loginbrand">
       <img src="gowork-logo.png" alt="GoWork — TradClab" class="loginlogo">
@@ -339,7 +402,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v23</span></div>
+    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v24</span></div>
   </div>
 </div>
 
@@ -575,7 +638,7 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
     <button class="btn btn-ghost btn-block fullspan" style="margin-top:10px" onclick="checkForUpdate(true)">⬆️ Cerca aggiornamenti</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork <span id="setVer">v23</span> · by Sergio</div>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork <span id="setVer">v24</span> · by Sergio</div>
   </section>
 </div>
 
@@ -1234,7 +1297,7 @@ function renderSettings(){
   document.getElementById('setRolMese').value=s.rolMese;
   document.getElementById('setPermr').value=s.permessiRetr;
   document.getElementById('dataVer').textContent=D.version;
-  try{const sv=document.getElementById('setVer');if(sv)sv.textContent=((window.GW_BUILD||'gw-v23').split('-').pop());}catch(e){}
+  try{const sv=document.getElementById('setVer');if(sv)sv.textContent=((window.GW_BUILD||'gw-v24').split('-').pop());}catch(e){}
   gistLoadCfg();
   const stId=document.getElementById('stId');if(stId)stId.value=_gId||'';
   const stTk=document.getElementById('stToken');if(stTk){stTk.value='';stTk.placeholder=_gToken?'Token salvato ✓ (lascia vuoto per mantenerlo)':'ghp_…';}
@@ -1702,7 +1765,7 @@ window.addEventListener('online',()=>checkForUpdate(false));
 applyTheme();
 applyLoginBg();
 (function boot(){
-  try{const lv=document.getElementById('loginVer');if(lv)lv.textContent=((window.GW_BUILD||'gw-v23').split('-').pop());}catch(e){}
+  try{const lv=document.getElementById('loginVer');if(lv)lv.textContent=((window.GW_BUILD||'gw-v24').split('-').pop());}catch(e){}
   try{
     const last=localStorage.getItem('gw_current');
     const u=last?getUsers().find(x=>x.email===last):null;
