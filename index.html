@@ -4,7 +4,8 @@
 <!-- AUTO-UPDATE: gira prima di tutto, svuota cache+SW se la build è cambiata -->
 <script>
 (function(){
-  var BUILD='20260606-gw-v20';
+  var BUILD='20260606-gw-v23';
+  try{window.GW_BUILD=BUILD;}catch(e){}
   try{
     var qp=new URLSearchParams(location.search);
     if(qp.has('force_update')){
@@ -271,11 +272,17 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 .loginfoot a{color:var(--go);font-weight:700;text-decoration:none;border-bottom:1px solid transparent;transition:.15s}
 .loginfoot a:active{opacity:.7;border-bottom-color:var(--go)}
 .loginquote{text-align:center;font-family:'Bricolage Grotesque',serif;font-style:italic;font-size:15px;line-height:1.5;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:-8px 0 22px;box-shadow:var(--shadow);min-height:24px;transition:opacity .5s}
+.loginquote:empty{display:none;padding:0;margin:0;border:none;min-height:0;box-shadow:none}
 .loginquote .qa{display:block;font-style:normal;font-family:'Manrope';font-size:12px;font-weight:700;color:var(--go);margin-top:8px;letter-spacing:.03em}
 </style>
 </head>
 <body>
 <div id="offlineBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:90;background:var(--pausa);color:#fff;text-align:center;font-size:12.5px;font-weight:600;padding:8px;padding-top:calc(8px + env(safe-area-inset-top))">📱 Offline</div>
+<div id="updateBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:96;background:var(--go);color:#06140d;text-align:center;font-size:13px;font-weight:700;padding:11px 14px;padding-top:calc(11px + env(safe-area-inset-top));box-shadow:0 6px 20px -8px rgba(0,0,0,.55)">
+  ⬆️ Nuova versione disponibile
+  <button onclick="applyUpdate(this)" style="margin-left:10px;background:#06140d;color:var(--go);border:none;border-radius:9px;padding:7px 14px;font-weight:800;font-size:13px;cursor:pointer">Aggiorna ora</button>
+  <button onclick="document.getElementById('updateBanner').style.display='none'" style="margin-left:6px;background:transparent;color:#06140d;border:none;font-weight:700;font-size:16px;cursor:pointer;opacity:.7" title="Ignora">✕</button>
+</div>
 
 <!-- ════════ PAGINA DI ACCESSO ════════ -->
 <div id="loginPage">
@@ -298,6 +305,13 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
         </div>
         <button class="btn btn-go btn-block" style="margin-top:10px" onclick="doLogin()">Accedi</button>
         <button class="btn btn-ghost btn-block btn-sm" style="margin-top:8px" onclick="backToProfiles()">‹ Cambia profilo</button>
+        <button class="linkbtn" onclick="startReset()" style="font-size:12.5px;opacity:.8;margin-top:2px">Password dimenticata?</button>
+        <div id="resetBox" style="display:none;margin-top:10px;text-align:left">
+          <div class="loginsub" style="font-size:13px;margin-bottom:8px">Imposta una nuova password</div>
+          <div class="pwrap"><input type="password" id="rsPass" placeholder="Nuova password (min. 6)" autocomplete="new-password"><button type="button" class="pweye" onclick="togglePw('rsPass',this)">Mostra</button></div>
+          <input type="password" id="rsPass2" placeholder="Ripeti la password" autocomplete="new-password" style="margin-top:8px" onkeydown="if(event.key==='Enter')doReset()">
+          <button class="btn btn-go btn-block" style="margin-top:10px" onclick="doReset()">Reimposta e accedi</button>
+        </div>
       </div>
       <button class="linkbtn" onclick="showRegister()">+ Crea un nuovo account</button>
       <button class="linkbtn" id="manageBtn" onclick="toggleManage()" style="font-size:13px;opacity:.75;margin-top:-4px">Gestisci profili</button>
@@ -318,13 +332,14 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
 
     <div id="loginMsg" class="loginmsg"></div>
 
-    <button class="linkbtn" id="lgToggle" onclick="toggleLgSync()" style="font-size:13px;opacity:.85">☁️ Recupera un account dal cloud (Gist)</button>
+    <div style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:6px;line-height:1.45">Per entrare bastano <b>email e password</b>.<br>Il cloud serve solo come backup per ritrovare l'account.</div>
+    <button class="linkbtn" id="lgToggle" onclick="toggleLgSync()" style="font-size:13px;opacity:.85">☁️ Backup / recupera account (Gist)</button>
     <div id="lgSync" style="display:none">
       <input type="password" id="lgToken" placeholder="GitHub token (ghp_…)" autocomplete="off">
       <input type="text" id="lgId" placeholder="Gist ID (vuoto = crea nuovo)" style="margin-top:8px">
       <button class="btn btn-go btn-block" style="margin-top:10px" onclick="loginGistConnect()">Connetti & carica account</button>
     </div>
-    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v20</span></div>
+    <div class="loginfoot">© 2026/2027 — GoWork associata <a href="https://tradori23-ops.github.io/tradocroods/" target="_blank" rel="noopener">TradClab</a> · <span id="loginVer">v23</span></div>
   </div>
 </div>
 
@@ -559,7 +574,8 @@ html[data-theme="dark"] .profcard .av{color:#06140d}
       <div class="hint">I dati sono salvati <b>solo su questo dispositivo</b> (localStorage) e funzionano senza internet. Fai un backup ogni tanto. Versione dati: <span id="dataVer"></span></div>
     </div>
     <button class="btn btn-go btn-block fullspan" onclick="saveSettings()">Salva impostazioni</button>
-    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork v20 · by Sergio</div>
+    <button class="btn btn-ghost btn-block fullspan" style="margin-top:10px" onclick="checkForUpdate(true)">⬆️ Cerca aggiornamenti</button>
+    <div class="fullspan" style="text-align:center;color:var(--muted);font-size:12px;margin-top:18px">GoWork <span id="setVer">v23</span> · by Sergio</div>
   </section>
 </div>
 
@@ -1218,6 +1234,7 @@ function renderSettings(){
   document.getElementById('setRolMese').value=s.rolMese;
   document.getElementById('setPermr').value=s.permessiRetr;
   document.getElementById('dataVer').textContent=D.version;
+  try{const sv=document.getElementById('setVer');if(sv)sv.textContent=((window.GW_BUILD||'gw-v23').split('-').pop());}catch(e){}
   gistLoadCfg();
   const stId=document.getElementById('stId');if(stId)stId.value=_gId||'';
   const stTk=document.getElementById('stToken');if(stTk){stTk.value='';stTk.placeholder=_gToken?'Token salvato ✓ (lascia vuoto per mantenerlo)':'ghp_…';}
@@ -1328,13 +1345,14 @@ function askDeleteProfile(email){
 function selectProfile(email){
   if(manageMode)return;
   selEmail=email;loginMsg('');
+  const rb=document.getElementById('resetBox');if(rb){rb.style.display='none';document.getElementById('rsPass').value='';document.getElementById('rsPass2').value='';}
   document.querySelectorAll('.profcard').forEach(c=>c.classList.toggle('sel',c.dataset.e===email));
   document.getElementById('passBox').style.display='block';
   const p=document.getElementById('loginPassword');p.value='';p.type='password';
   const eye=p.parentElement.querySelector('.pweye');if(eye)eye.textContent='Mostra';
   setTimeout(()=>p.focus(),60);
 }
-function backToProfiles(){selEmail=null;document.getElementById('passBox').style.display='none';document.querySelectorAll('.profcard').forEach(c=>c.classList.remove('sel'));loginMsg('');}
+function backToProfiles(){selEmail=null;document.getElementById('passBox').style.display='none';const rb=document.getElementById('resetBox');if(rb)rb.style.display='none';document.querySelectorAll('.profcard').forEach(c=>c.classList.remove('sel'));loginMsg('');}
 function showRegister(first){
   loginMsg('');
   document.getElementById('profilesBox').style.display='none';
@@ -1367,17 +1385,47 @@ async function doRegister(){
   sendWelcomeEmail(name,email);
   enterApp(u);
 }
+function startReset(){
+  if(!selEmail){loginMsg('Seleziona prima il profilo.','error');return;}
+  gistLoadCfg();
+  if(!_gToken||!_gId){
+    loginMsg('Per reimpostare la password collega prima il backup cloud qui sotto, poi riprova.','info');
+    const ls=document.getElementById('lgSync');if(ls)ls.style.display='block';
+    return;
+  }
+  document.getElementById('resetBox').style.display='block';
+  loginMsg('Backup cloud collegato: imposta una nuova password.','ok');
+}
+async function doReset(){
+  if(!selEmail)return;
+  const p1=document.getElementById('rsPass').value,p2=document.getElementById('rsPass2').value;
+  if(p1.length<6){loginMsg('Password minimo 6 caratteri.','error');return;}
+  if(p1!==p2){loginMsg('Le due password non coincidono.','error');return;}
+  const users=getUsers();const u=users.find(x=>x.email===selEmail);
+  if(!u){loginMsg('Profilo non trovato.','error');return;}
+  const salt=randSalt();u.salt=salt;u.pass=await hashPass(p1,salt);
+  saveUsers(users);
+  try{if(_gToken&&_gId)await gistApi('PATCH','/gists/'+_gId,{files:{'gowork_users.json':{content:JSON.stringify(getUsers())}}});}catch(e){}
+  loginMsg('Password aggiornata.','ok');
+  enterApp(u);
+}
 function enterApp(user){
   currentUser=user;
   localStorage.setItem('gw_current',user.email);
   D=load();
   if(!D.profile.nome){D.profile.nome=user.name||'';}
+  // auto-riparazione di eventuali dati incompleti (evita blocchi all'avvio)
+  if(!D.profile)D.profile={};
+  if(!D.settings)D.settings=DEFAULTS().settings;
+  if(D.sessione&&!Array.isArray(D.sessione.pause))D.sessione.pause=[];
+  if(!D.giornate||typeof D.giornate!=='object')D.giornate={};
+  ['assenze','diario','impegni','carriera'].forEach(k=>{if(!Array.isArray(D[k]))D[k]=[];});
   save();
-  mirrorLoginBg();
+  try{mirrorLoginBg();}catch(e){}
   document.getElementById('loginPage').style.display='none';
   document.querySelector('.app').style.display='block';
   document.getElementById('tabbar').style.display='flex';
-  applyTheme();buildTabs();renderHeaderAvatar();go('oggi');renderOggi();
+  try{applyTheme();buildTabs();renderHeaderAvatar();go('oggi');renderOggi();}catch(e){console.error('render avvio',e);}
   gistInit();
 }
 function logout(){
@@ -1470,9 +1518,20 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pagehide',()=>{flushSettings();if(gistReady&&currentUser&&!_gSyncing)gistPush();});
 
 /* azioni UI — schermata di accesso */
-function toggleLgSync(){const b=document.getElementById('lgSync');b.style.display=b.style.display==='none'?'block':'none';}
+function toggleLgSync(){
+  const b=document.getElementById('lgSync');
+  const opening=b.style.display==='none';
+  b.style.display=opening?'block':'none';
+  if(opening){ // pre-compila i dati già salvati su questo dispositivo
+    gistLoadCfg();
+    const idf=document.getElementById('lgId');if(idf&&_gId)idf.value=_gId;
+    const tkf=document.getElementById('lgToken');if(tkf&&_gToken){tkf.placeholder='Token salvato ✓ (lascia vuoto per usarlo)';}
+  }
+}
 async function loginGistConnect(){
-  const t=document.getElementById('lgToken').value.trim(),i=document.getElementById('lgId').value.trim();
+  let t=document.getElementById('lgToken').value.trim();
+  const i=document.getElementById('lgId').value.trim();
+  if(!t){gistLoadCfg();if(_gToken)t=_gToken;} // riusa il token salvato se il campo è vuoto
   if(!t){loginMsg('Inserisci il token GitHub.','error');return;}
   gistSaveCfg(t,i||null);loginMsg('⏳ Connessione…','info');
   if(!i){const nid=await gistCreateNew();if(!nid){loginMsg('Token non valido o senza permesso "gist".','error');return;}}
@@ -1604,20 +1663,64 @@ function setQuote(){
 }
 setInterval(()=>{if(document.getElementById('loginPage').style.display!=='none')setQuote();},9000);
 
+/* ================= AGGIORNAMENTO APP ================= */
+let _lastUpdCheck=0,_updFound=false;
+async function checkForUpdate(manual){
+  if(!navigator.onLine){if(manual)toast('Sei offline');return;}
+  const now=Date.now();
+  if(!manual && (_updFound || now-_lastUpdCheck<120000))return; // auto: max 1 volta ogni 2 min
+  _lastUpdCheck=now;
+  try{
+    const base=location.href.split('?')[0].split('#')[0];
+    const r=await fetch(base+'?_uv='+now,{cache:'no-store'});
+    if(!r||!r.ok){if(manual)toast('Controllo non riuscito');return;}
+    const txt=await r.text();
+    const m=txt.match(/var BUILD=['"]([^'"]+)['"]/);
+    if(!m){if(manual)toast('Controllo non riuscito');return;}
+    const remote=m[1], local=(window.GW_BUILD||'');
+    if(remote && local && remote!==local){
+      _updFound=true;
+      const b=document.getElementById('updateBanner');if(b)b.style.display='block';
+      if(manual)toast('Aggiornamento trovato ⬆️');
+    }else if(manual){toast('App già aggiornata ✓');}
+  }catch(e){if(manual)toast('Nessuna connessione');}
+}
+async function applyUpdate(btn){
+  if(btn){btn.textContent='Aggiorno…';btn.disabled=true;}
+  try{flushSettings&&flushSettings();}catch(e){}
+  try{if(gistReady&&currentUser&&typeof gistPush==='function'){await gistPush();}}catch(e){} // salva sul cloud prima di ricaricare
+  try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}}catch(e){}
+  try{if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(e){}
+  try{localStorage.removeItem('gw_build');localStorage.removeItem('gw_ios_cache_ts');}catch(e){}
+  const u=location.href.split('?')[0].split('#')[0]+'?_u='+Date.now();
+  location.replace(u);
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkForUpdate(false);});
+window.addEventListener('online',()=>checkForUpdate(false));
+
 /* ================= BOOT ================= */
 applyTheme();
 applyLoginBg();
 (function boot(){
-  const lv=document.getElementById('loginVer');if(lv)lv.textContent=(BUILD.split('-').pop()||'v18');
-  const last=localStorage.getItem('gw_current');
-  const u=last?getUsers().find(x=>x.email===last):null;
-  if(u){enterApp(u);}
-  else{
-    document.getElementById('loginPage').style.display='flex';showProfiles();setQuote();
+  try{const lv=document.getElementById('loginVer');if(lv)lv.textContent=((window.GW_BUILD||'gw-v23').split('-').pop());}catch(e){}
+  try{
+    const last=localStorage.getItem('gw_current');
+    const u=last?getUsers().find(x=>x.email===last):null;
+    if(u){enterApp(u);return;}
+  }catch(e){console.error('avvio accesso automatico',e);}
+  // login normale (o fallback se l'accesso automatico è fallito)
+  try{
+    currentUser=null;
+    document.getElementById('loginPage').style.display='flex';
+    document.querySelector('.app').style.display='none';
+    document.getElementById('tabbar').style.display='none';
+    showProfiles();setQuote();
     gistLoadCfg();
-    if(_gToken&&_gId){gistInit().then(()=>{if(!currentUser)showProfiles();});}
-  }
+    if(_gToken&&_gId){gistInit().then(()=>{if(!currentUser)showProfiles();}).catch(()=>{});}
+  }catch(e){console.error('login UI',e);try{showRegister(true);}catch(_){}}
 })();
+setTimeout(()=>{try{checkForUpdate(false);}catch(e){}},4000); // controllo nuova versione all'avvio
+
 </script>
 
 <!-- ═══ OFFLINE — Service Worker via Blob (desktop/Android) ═══ -->
